@@ -1,19 +1,23 @@
 package http
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"net/http"
+	"trainee/config/container"
 	"trainee/internal/infra/http/handlers"
 )
 
-func Router(commentHandler *handlers.CommentHandler) http.Handler {
-	router := mux.NewRouter()
+func Router(cont container.Container) http.Handler {
+
+	router := chi.NewRouter()
 
 	// Health
 	router.Group(func(healthRouter chi.Router) {
 		healthRouter.Use(middleware.RedirectSlashes)
 
-		healthRouter.Route("/ping", func(healthRouter chi.Router) {
+		healthRouter.Route("/api/ping", func(healthRouter chi.Router) {
 			healthRouter.Get("/", PingHandler())
 
 			healthRouter.Handle("/*", NotFoundJSON())
@@ -21,11 +25,32 @@ func Router(commentHandler *handlers.CommentHandler) http.Handler {
 	})
 
 	router.Group(func(apiRouter chi.Router) {
-		apiRouter.Use(middleware.RedirectSlashes)
+		apiRouter.Use(middleware.RedirectSlashes, cors.Handler(cors.Options{
+			AllowedOrigins: []string{
+				"https://*",
+				"http://*",
+			},
+			AllowedMethods: []string{
+				"GET",
+				"POST",
+				"PUT",
+				"DELETE",
+			},
+			AllowedHeaders: []string{
+				"Accept",
+				"Content-Type",
+			},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: false,
+			MaxAge:           300,
+		}))
 
-		apiRouter.Route("/grass", func(apiRouter chi.Router) {
-			AddEventRoutes(&apiRouter, eventController)
+		apiRouter.Route("/api/v1", func(apiRouter chi.Router) {
+			apiRouter.Group(func(apiRouter chi.Router) {
+				CommentRouter(apiRouter, cont.CommentHandler)
+				apiRouter.Handle("/*", NotFoundJSON())
 
+			})
 			apiRouter.Handle("/*", NotFoundJSON())
 		})
 	})
@@ -33,24 +58,11 @@ func Router(commentHandler *handlers.CommentHandler) http.Handler {
 	return router
 }
 
-func AddEventRoutes(router *chi.Router, eventController *controllers.EventController) {
-	(*router).Route("/events", func(apiRouter chi.Router) {
-		apiRouter.Get(
-			"/FindAllUsers",
-			eventController.FindAll(),
-		)
-		apiRouter.Get(
-			"/FindByName/{name}",
-			eventController.FindByName(),
-		)
-
-		apiRouter.Get(
-			"/Create/{name}/{age}/{city}/{country}",
-			eventController.CreateUser(),
-		)
-		apiRouter.Get(
-			"/UpdateData/{id}/{name}/{age}/{city}/{country}",
-			eventController.UpdateById(),
+func CommentRouter(router chi.Router, ch handlers.CommentHandler) {
+	router.Route("/comments", func(apiRouter chi.Router) {
+		apiRouter.Post(
+			"/save",
+			ch.SaveComment(),
 		)
 	})
 }

@@ -1,11 +1,11 @@
 package domain
 
 type Comment struct {
-	PostId int    `json:"postId"`
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Email  string `json:"email"`
-	Body   string `json:"body"`
+	Id     int64
+	PostId int64
+	Name   string
+	Email  string
+	Body   string
 }
 
 //todo delete json

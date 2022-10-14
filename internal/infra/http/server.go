@@ -2,24 +2,33 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 )
 
-type Server struct {
-	httpServer *http.Server
-}
-
-func (s Server) Run(port string) error {
-	s.httpServer = &http.Server{
-		Addr:           ":" + port,
-		MaxHeaderBytes: 1 << 20,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+func Server(ctx context.Context, router http.Handler) error {
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", 8080),
+		Handler: router,
 	}
-	return s.httpServer.ListenAndServe()
-}
 
-func (s Server) Shutdown(ctx context.Context) error {
-	return s.httpServer.Shutdown(ctx)
+	errServerCh := make(chan error)
+	go func() {
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			errServerCh <- err
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+		defer cancel()
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			return fmt.Errorf("error during server shutdown: %w", err)
+		}
+	case err := <-errServerCh:
+		return fmt.Errorf("error during server execution: %w", err)
+	}
+	return nil
 }
