@@ -10,11 +10,12 @@ type CommentDTO struct {
 	Body   string `json:"body"`
 }
 
-func (d CommentDTO) MapDomainToCommentDTO(comment domain.Comment) CommentDTO {
-	d.Id = comment.Id
-	d.PostID = comment.PostId
-	d.Name = comment.Name
-	d.Email = comment.Email
-	d.Body = comment.Body
-	return d
+func MapDomainToCommentDTO(comment domain.Comment) CommentDTO {
+	return CommentDTO{
+		Id:     comment.Id,
+		PostID: comment.PostId,
+		Name:   comment.Name,
+		Email:  comment.Email,
+		Body:   comment.Body,
+	}
 }

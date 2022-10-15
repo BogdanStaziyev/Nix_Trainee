@@ -7,5 +7,3 @@ type Comment struct {
 	Email  string
 	Body   string
 }
-
-//todo delete json

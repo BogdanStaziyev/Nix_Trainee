@@ -64,5 +64,9 @@ func CommentRouter(router chi.Router, ch handlers.CommentHandler) {
 			"/save",
 			ch.SaveComment(),
 		)
+		apiRouter.Get(
+			"/{id}",
+			ch.GetComment(),
+		)
 	})
 }
