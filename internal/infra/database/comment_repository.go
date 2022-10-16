@@ -45,7 +45,7 @@ func (r commentsRepository) SaveComment(comment domain.Comment) (domain.Comment,
 func (r commentsRepository) GetComment(id int64) (domain.Comment, error) {
 	var comment comments
 
-	err := r.coll.Find("id", id).One(comment)
+	err := r.coll.Find("id", id).One(&comment)
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("CommentRepository GetComment: %w", err)
 	}
@@ -55,9 +55,14 @@ func (r commentsRepository) GetComment(id int64) (domain.Comment, error) {
 func (r commentsRepository) UpdateComment(comment domain.Comment) (domain.Comment, error) {
 	updateComment := r.mapCommentDBModel(comment)
 
-	err := r.coll.Find("id", updateComment.Id).Update(updateComment)
+	err := r.coll.Find(db.Cond{"id": updateComment.Id}).Update(&updateComment)
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("CommentRepository UpdateComment: %w", err)
+	}
+
+	err = r.coll.Find(db.Cond{"id": updateComment.Id}).One(&updateComment)
+	if err != nil {
+		return domain.Comment{}, err
 	}
 	return r.mapCommentDbModelToDomain(updateComment), nil
 }

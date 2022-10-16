@@ -65,8 +65,16 @@ func CommentRouter(router chi.Router, ch handlers.CommentHandler) {
 			ch.SaveComment(),
 		)
 		apiRouter.Get(
-			"/{id}",
+			"/comment",
 			ch.GetComment(),
+		)
+		apiRouter.Put(
+			"/update",
+			ch.UpdateComment(),
+		)
+		apiRouter.Delete(
+			"/delete",
+			ch.DeleteComment(),
 		)
 	})
 }
