@@ -17,10 +17,12 @@ type Container struct {
 
 type Services struct {
 	app.CommentService
+	app.PostService
 }
 
 type Handlers struct {
 	handlers.CommentHandler
+	handlers.PostHandler
 }
 
 func New(conf config.Configuration) Container {
@@ -30,12 +32,18 @@ func New(conf config.Configuration) Container {
 	commentService := app.NewCommentService(commentRepository)
 	commentHandler := handlers.NewCommentHandler(commentService)
 
+	postRepository := database.NewPostRepository(sess)
+	postService := app.NewPostService(postRepository)
+	postHandler := handlers.NewPostHandler(postService)
+
 	return Container{
 		Services: Services{
 			commentService,
+			postService,
 		},
 		Handlers: Handlers{
 			commentHandler,
+			postHandler,
 		},
 	}
 }

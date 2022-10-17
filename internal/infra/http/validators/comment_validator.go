@@ -12,7 +12,7 @@ type CommentValidator struct {
 	validator *validator.Validate
 }
 
-func NewCoordinateValidator() CommentValidator {
+func NewCommentValidator() CommentValidator {
 	return CommentValidator{
 		validator: validator.New(),
 	}

@@ -48,6 +48,7 @@ func Router(cont container.Container) http.Handler {
 		apiRouter.Route("/api/v1", func(apiRouter chi.Router) {
 			apiRouter.Group(func(apiRouter chi.Router) {
 				CommentRouter(apiRouter, cont.CommentHandler)
+				PostRouter(apiRouter, cont.PostHandler)
 				apiRouter.Handle("/*", NotFoundJSON())
 
 			})
@@ -75,6 +76,27 @@ func CommentRouter(router chi.Router, ch handlers.CommentHandler) {
 		apiRouter.Delete(
 			"/delete",
 			ch.DeleteComment(),
+		)
+	})
+}
+
+func PostRouter(router chi.Router, ph handlers.PostHandler) {
+	router.Route("/posts", func(apiRouter chi.Router) {
+		apiRouter.Post(
+			"/save",
+			ph.SavePost(),
+		)
+		apiRouter.Get(
+			"/post",
+			ph.GetPost(),
+		)
+		apiRouter.Put(
+			"/update",
+			ph.UpdatePost(),
+		)
+		apiRouter.Delete(
+			"/delete",
+			ph.DeletePost(),
 		)
 	})
 }

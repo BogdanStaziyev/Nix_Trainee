@@ -20,7 +20,7 @@ type CommentHandler struct {
 func NewCommentHandler(s app.CommentService) CommentHandler {
 	return CommentHandler{
 		service: s,
-		val:     validators.NewCoordinateValidator(),
+		val:     validators.NewCommentValidator(),
 	}
 }
 
@@ -129,8 +129,3 @@ func (c CommentHandler) DeleteComment() http.HandlerFunc {
 		}
 	}
 }
-
-//func (s service) DeleteComment(id int64) error {
-//	//TODO implement me
-//	panic("implement me")
-//}

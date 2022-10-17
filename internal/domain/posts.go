@@ -1,10 +1,8 @@
 package domain
 
 type Post struct {
-	UserId int    `json:"userId"`
-	Id     int    `json:"id"`
-	Title  string `json:"title"`
-	Body   string `json:"body"`
+	UserId int
+	Id     int
+	Title  string
+	Body   string
 }
-
-//todo delete json

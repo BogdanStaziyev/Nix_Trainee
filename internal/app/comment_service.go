@@ -12,28 +12,28 @@ type CommentService interface {
 	DeleteComment(id int64) error
 }
 
-type service struct {
+type commentService struct {
 	repo database.CommentRepo
 }
 
 func NewCommentService(repo database.CommentRepo) CommentService {
-	return service{
+	return commentService{
 		repo: repo,
 	}
 }
 
-func (s service) SaveComment(comment domain.Comment) (domain.Comment, error) {
+func (s commentService) SaveComment(comment domain.Comment) (domain.Comment, error) {
 	return s.repo.SaveComment(comment)
 }
 
-func (s service) GetComment(id int64) (domain.Comment, error) {
+func (s commentService) GetComment(id int64) (domain.Comment, error) {
 	return s.repo.GetComment(id)
 }
 
-func (s service) UpdateComment(comment domain.Comment) (domain.Comment, error) {
+func (s commentService) UpdateComment(comment domain.Comment) (domain.Comment, error) {
 	return s.repo.UpdateComment(comment)
 }
 
-func (s service) DeleteComment(id int64) error {
+func (s commentService) DeleteComment(id int64) error {
 	return s.repo.DeleteComment(id)
 }
