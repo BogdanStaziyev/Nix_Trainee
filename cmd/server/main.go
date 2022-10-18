@@ -50,7 +50,7 @@ func main() {
 	// HTTP Server
 	err = http.Server(
 		ctx,
-		http.NetRouter(cont),
+		http.Router(cont),
 	)
 
 	if err != nil {
