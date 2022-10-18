@@ -32,10 +32,10 @@ func created(w http.ResponseWriter, body interface{}) {
 	}
 }
 
-func noContent(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusNoContent)
-}
+//func noContent(w http.ResponseWriter) {
+//	w.Header().Set("Content-Type", "application/json")
+//	w.WriteHeader(http.StatusNoContent)
+//}
 
 func BadRequest(w http.ResponseWriter, err error) {
 	w.Header().Set("Content-Type", "application/json")
@@ -44,12 +44,12 @@ func BadRequest(w http.ResponseWriter, err error) {
 	encodeErrorBody(w, err)
 }
 
-func Forbidden(w http.ResponseWriter, err error) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusForbidden)
-
-	encodeErrorBody(w, err)
-}
+//func Forbidden(w http.ResponseWriter, err error) {
+//	w.Header().Set("Content-Type", "application/json")
+//	w.WriteHeader(http.StatusForbidden)
+//
+//	encodeErrorBody(w, err)
+//}
 
 func InternalServerError(w http.ResponseWriter, err error) {
 	w.Header().Set("Content-Type", "application/json")
@@ -59,20 +59,20 @@ func InternalServerError(w http.ResponseWriter, err error) {
 }
 
 //nolint
-func validationError(w http.ResponseWriter, err error) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusUnprocessableEntity)
-
-	encodeErrorBody(w, err)
-}
+//func validationError(w http.ResponseWriter, err error) {
+//	w.Header().Set("Content-Type", "application/json")
+//	w.WriteHeader(http.StatusUnprocessableEntity)
+//
+//	encodeErrorBody(w, err)
+//}
 
 //nolint
-func genericError(w http.ResponseWriter, err error) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
-
-	encodeErrorBody(w, err)
-}
+//func genericError(w http.ResponseWriter, err error) {
+//	w.Header().Set("Content-Type", "application/json")
+//	w.WriteHeader(http.StatusBadRequest)
+//
+//	encodeErrorBody(w, err)
+//}
 
 func NotFound(w http.ResponseWriter, err error) {
 	w.Header().Set("Content-Type", "application/json")
