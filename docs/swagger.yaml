@@ -1,0 +1,270 @@
+basePath: /api/v1
+definitions:
+  domain.Comment:
+    properties:
+      body:
+        example: lorem ipsum
+        type: string
+      email:
+        example: example@mail.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: Bohdan
+        type: string
+      post_id:
+        example: 3
+        type: integer
+    required:
+    - body
+    - email
+    - name
+    - post_id
+    type: object
+  domain.Post:
+    properties:
+      body:
+        example: Lorem ipsum
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Lorem ipsum
+        type: string
+      user_id:
+        example: 1
+        type: integer
+    required:
+    - body
+    - title
+    - user_id
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: REST service for NIX TRAINEE PROGRAM
+  title: NIX TRAINEE PROGRAM Dmo App
+  version: V1.echo
+paths:
+  /comments/comment/{id}:
+    get:
+      description: Get Comment
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "404":
+          description: Not Found
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get Comment
+      tags:
+      - Comments Actions
+  /comments/delete/{id}:
+    delete:
+      description: Delete Comment
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Comment
+      tags:
+      - Comments Actions
+  /comments/save:
+    post:
+      consumes:
+      - application/json
+      description: Save Comment
+      parameters:
+      - description: comment info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Comment'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "400":
+          description: Bad Request
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Save Comment
+      tags:
+      - Comments Actions
+  /comments/update:
+    put:
+      consumes:
+      - application/json
+      description: Update Comment
+      parameters:
+      - description: comment info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "404":
+          description: Not Found
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Update Comment
+      tags:
+      - Comments Actions
+  /posts/delete/{id}:
+    delete:
+      description: Delete Post
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Post
+      tags:
+      - Posts Actions
+  /posts/post/{id}:
+    get:
+      description: Get Post
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Post'
+        "404":
+          description: Not Found
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get Post
+      tags:
+      - Posts Actions
+  /posts/save:
+    post:
+      consumes:
+      - application/json
+      description: Save Post
+      parameters:
+      - description: comment info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Post'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Post'
+        "400":
+          description: Bad Request
+          schema: {}
+        "422":
+          description: Unprocessable Entity
+          schema: {}
+        "500":
+          description: Internal Server Error
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Save Post
+      tags:
+      - Posts Actions
+  /posts/update:
+    put:
+      consumes:
+      - application/json
+      description: Update Post
+      parameters:
+      - description: post info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Post'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Post'
+        "404":
+          description: Not Found
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Update Post
+      tags:
+      - Posts Actions
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

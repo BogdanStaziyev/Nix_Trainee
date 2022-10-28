@@ -5,6 +5,7 @@ import (
 	"trainee/internal/infra/database"
 )
 
+//go:generate mockery --dir . --name CommentService --output ./mocks
 type CommentService interface {
 	SaveComment(comment domain.Comment) (domain.Comment, error)
 	GetComment(id int64) (domain.Comment, error)

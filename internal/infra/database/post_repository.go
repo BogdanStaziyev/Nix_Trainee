@@ -15,6 +15,7 @@ type posts struct {
 	Body   string `db:"body"`
 }
 
+//go:generate mockery --dir . --name PostRepo --output ./mock
 type PostRepo interface {
 	SavePost(post domain.Post) (domain.Post, error)
 	GetPost(id int64) (domain.Post, error)
@@ -44,7 +45,7 @@ func (r postsRepository) SavePost(post domain.Post) (domain.Post, error) {
 func (r postsRepository) GetPost(id int64) (domain.Post, error) {
 	var post posts
 
-	err := r.coll.Find("id", id).One(&post)
+	err := r.coll.Find(db.Cond{"id": id}).One(&post)
 	if err != nil {
 		return domain.Post{}, fmt.Errorf("PostRepository GetPost: %w", err)
 	}
@@ -67,7 +68,15 @@ func (r postsRepository) UpdatePost(post domain.Post) (domain.Post, error) {
 }
 
 func (r postsRepository) DeletePost(id int64) error {
-	err := r.coll.Find("id", id).Delete()
+	var post posts
+
+	fiendPost := r.coll.Find(db.Cond{"id":id})
+
+	err := fiendPost.One(&post)
+	if err != nil {
+		return fmt.Errorf("PostRepository Delete: %w", err)
+	}
+	err = fiendPost.Delete()
 	if err != nil {
 		return fmt.Errorf("PostRepository Delete: %w", err)
 	}

@@ -14,6 +14,16 @@ import (
 	"trainee/internal/infra/http"
 )
 
+// @title 		NIX TRAINEE PROGRAM Demo App
+// @version 	V1.echo
+// @description REST service for NIX TRAINEE PROGRAM
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
+// @host 		localhost:8080
+// @BasePath 	/api/v1
 func main() {
 	exitCode := 0
 	ctx, cancel := context.WithCancel(context.Background())
@@ -50,7 +60,7 @@ func main() {
 	// HTTP Server
 	err = http.Server(
 		ctx,
-		http.Router(cont),
+		http.EchoRouter(cont),
 	)
 
 	if err != nil {

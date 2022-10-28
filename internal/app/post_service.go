@@ -5,6 +5,7 @@ import (
 	"trainee/internal/infra/database"
 )
 
+//go:generate mockery --dir . --name PostService --output ./mocks
 type PostService interface {
 	SavePost(post domain.Post) (domain.Post, error)
 	GetPost(id int64) (domain.Post, error)

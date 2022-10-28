@@ -1,18 +1,10 @@
 package http
 
 import (
-	"encoding/json"
-	"fmt"
+	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
-func PingHandler() http.HandlerFunc {
-	return func(writer http.ResponseWriter, request *http.Request) {
-		writer.Header().Set("Content-Type", "application/json")
-		writer.WriteHeader(http.StatusOK)
-		err := json.NewEncoder(writer).Encode("OK")
-		if err != nil {
-			fmt.Printf("writing response: %s", err)
-		}
-	}
+func PingHandler(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, "PING OK")
 }

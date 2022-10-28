@@ -9,13 +9,14 @@ import (
 const CommentTable = "commentses"
 
 type comments struct {
-	Id     int64  `db:"id,omitempty"`
+	ID     int64  `db:"id,omitempty"`
 	PostID int64  `db:"post_id"`
 	Name   string `db:"name"`
 	Email  string `db:"email"`
 	Body   string `db:"body"`
 }
 
+//go:generate mockery --dir . --name CommentRepo --output ./mock
 type CommentRepo interface {
 	SaveComment(comment domain.Comment) (domain.Comment, error)
 	GetComment(id int64) (domain.Comment, error)
@@ -45,7 +46,7 @@ func (r commentsRepository) SaveComment(comment domain.Comment) (domain.Comment,
 func (r commentsRepository) GetComment(id int64) (domain.Comment, error) {
 	var comment comments
 
-	err := r.coll.Find("id", id).One(&comment)
+	err := r.coll.Find(db.Cond{"id": id}).One(&comment)
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("CommentRepository GetComment: %w", err)
 	}
@@ -55,12 +56,12 @@ func (r commentsRepository) GetComment(id int64) (domain.Comment, error) {
 func (r commentsRepository) UpdateComment(comment domain.Comment) (domain.Comment, error) {
 	updateComment := r.mapCommentDBModel(comment)
 
-	err := r.coll.Find(db.Cond{"id": updateComment.Id}).Update(&updateComment)
+	err := r.coll.Find(db.Cond{"id": updateComment.ID}).Update(&updateComment)
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("CommentRepository UpdateComment: %w", err)
 	}
 
-	err = r.coll.Find(db.Cond{"id": updateComment.Id}).One(&updateComment)
+	err = r.coll.Find(db.Cond{"id": updateComment.ID}).One(&updateComment)
 	if err != nil {
 		return domain.Comment{}, err
 	}
@@ -68,7 +69,13 @@ func (r commentsRepository) UpdateComment(comment domain.Comment) (domain.Commen
 }
 
 func (r commentsRepository) DeleteComment(id int64) error {
-	err := r.coll.Find("id", id).Delete()
+	var comment comments
+
+	err := r.coll.Find(db.Cond{"id": id}).One(&comment)
+	if err != nil {
+		return fmt.Errorf("CommentRepository Delete: %w", err)
+	}
+	err = r.coll.Find(db.Cond{"id": id}).Delete()
 	if err != nil {
 		return fmt.Errorf("CommentRepository Delete: %w", err)
 	}
@@ -77,8 +84,8 @@ func (r commentsRepository) DeleteComment(id int64) error {
 
 func (r commentsRepository) mapCommentDBModel(comment domain.Comment) comments {
 	return comments{
-		Id:     comment.Id,
-		PostID: comment.PostId,
+		ID:     comment.ID,
+		PostID: comment.PostID,
 		Name:   comment.Name,
 		Email:  comment.Email,
 		Body:   comment.Body,
@@ -87,8 +94,8 @@ func (r commentsRepository) mapCommentDBModel(comment domain.Comment) comments {
 
 func (r commentsRepository) mapCommentDbModelToDomain(mcomment comments) domain.Comment {
 	return domain.Comment{
-		Id:     mcomment.Id,
-		PostId: mcomment.PostID,
+		ID:     mcomment.ID,
+		PostID: mcomment.PostID,
 		Name:   mcomment.Name,
 		Email:  mcomment.Email,
 		Body:   mcomment.Body,
