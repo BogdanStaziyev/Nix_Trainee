@@ -1,8 +1,14 @@
 package domain
 
+import "time"
+
 type Post struct {
-	UserId int    `json:"user_id" example:"1" validate:"required"`
-	Id     int    `json:"id,omitempty" example:"1"`
-	Title  string `json:"title" example:"Lorem ipsum" validate:"required"`
-	Body   string `json:"body" example:"Lorem ipsum" validate:"required"`
+	UserID      int64
+	ID          int64
+	Title       string
+	Body        string
+	Comment     []Comment
+	CreatedDate time.Time
+	UpdatedDate time.Time
+	DeletedDate *time.Time
 }

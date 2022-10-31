@@ -11,6 +11,7 @@ type CommentService interface {
 	GetComment(id int64) (domain.Comment, error)
 	UpdateComment(comment domain.Comment) (domain.Comment, error)
 	DeleteComment(id int64) error
+	GetCommentsByPostID(postID int64) ([]domain.Comment, error)
 }
 
 type commentService struct {
@@ -37,4 +38,8 @@ func (s commentService) UpdateComment(comment domain.Comment) (domain.Comment, e
 
 func (s commentService) DeleteComment(id int64) error {
 	return s.repo.DeleteComment(id)
+}
+
+func (s commentService) GetCommentsByPostID(postID int64) ([]domain.Comment, error) {
+	return s.repo.GetCommentsByPostID(postID)
 }

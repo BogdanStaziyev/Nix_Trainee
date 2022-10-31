@@ -3,17 +3,21 @@ package database
 import (
 	"fmt"
 	"github.com/upper/db/v4"
+	"time"
 	"trainee/internal/domain"
 )
 
-const CommentTable = "commentses"
+const CommentTable = "comments"
 
 type comments struct {
-	ID     int64  `db:"id,omitempty"`
-	PostID int64  `db:"post_id"`
-	Name   string `db:"name"`
-	Email  string `db:"email"`
-	Body   string `db:"body"`
+	ID          int64      `db:"id,omitempty"`
+	PostID      int64      `db:"post_id"`
+	Name        string     `db:"name"`
+	Email       string     `db:"email"`
+	Body        string     `db:"body"`
+	CreatedDate time.Time  `db:"created_date,omitempty"`
+	UpdatedDate time.Time  `db:"updated_date"`
+	DeletedDate *time.Time `db:"deleted_date,omitempty"`
 }
 
 //go:generate mockery --dir . --name CommentRepo --output ./mock
@@ -22,6 +26,7 @@ type CommentRepo interface {
 	GetComment(id int64) (domain.Comment, error)
 	UpdateComment(comment domain.Comment) (domain.Comment, error)
 	DeleteComment(id int64) error
+	GetCommentsByPostID(postID int64) ([]domain.Comment, error)
 }
 
 type commentsRepository struct {
@@ -36,6 +41,8 @@ func NewCommentRepository(dbSession db.Session) CommentRepo {
 
 func (r commentsRepository) SaveComment(comment domain.Comment) (domain.Comment, error) {
 	commentsDB := r.mapCommentDBModel(comment)
+	commentsDB.CreatedDate = time.Now()
+	commentsDB.UpdatedDate = time.Now()
 	err := r.coll.InsertReturning(&commentsDB)
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("CommentrepositoryCreate: %w", err)
@@ -46,7 +53,10 @@ func (r commentsRepository) SaveComment(comment domain.Comment) (domain.Comment,
 func (r commentsRepository) GetComment(id int64) (domain.Comment, error) {
 	var comment comments
 
-	err := r.coll.Find(db.Cond{"id": id}).One(&comment)
+	err := r.coll.Find(db.Cond{
+		"id":           id,
+		"deleted_date": nil,
+	}).One(&comment)
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("CommentRepository GetComment: %w", err)
 	}
@@ -55,31 +65,35 @@ func (r commentsRepository) GetComment(id int64) (domain.Comment, error) {
 
 func (r commentsRepository) UpdateComment(comment domain.Comment) (domain.Comment, error) {
 	updateComment := r.mapCommentDBModel(comment)
+	updateComment.UpdatedDate = time.Now()
 
 	err := r.coll.Find(db.Cond{"id": updateComment.ID}).Update(&updateComment)
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("CommentRepository UpdateComment: %w", err)
 	}
 
-	err = r.coll.Find(db.Cond{"id": updateComment.ID}).One(&updateComment)
-	if err != nil {
-		return domain.Comment{}, err
-	}
+	//err = r.coll.Find(db.Cond{"id": updateComment.ID}).One(&updateComment)
+	//if err != nil {
+	//	return domain.Comment{}, err
+	//}
 	return r.mapCommentDbModelToDomain(updateComment), nil
 }
 
 func (r commentsRepository) DeleteComment(id int64) error {
-	var comment comments
+	return r.coll.Find(db.Cond{
+		"id":           id,
+		"deleted_date": nil,
+	}).Update(map[string]interface{}{"deleted_date": time.Now()})
+}
 
-	err := r.coll.Find(db.Cond{"id": id}).One(&comment)
+func (r commentsRepository) GetCommentsByPostID(postID int64) ([]domain.Comment, error) {
+	var comment []comments
+
+	err := r.coll.Find(db.Cond{"post_id": postID}).All(&comment)
 	if err != nil {
-		return fmt.Errorf("CommentRepository Delete: %w", err)
+		return []domain.Comment{}, err
 	}
-	err = r.coll.Find(db.Cond{"id": id}).Delete()
-	if err != nil {
-		return fmt.Errorf("CommentRepository Delete: %w", err)
-	}
-	return nil
+	return r.mapCommentCollection(comment), nil
 }
 
 func (r commentsRepository) mapCommentDBModel(comment domain.Comment) comments {
@@ -92,12 +106,24 @@ func (r commentsRepository) mapCommentDBModel(comment domain.Comment) comments {
 	}
 }
 
-func (r commentsRepository) mapCommentDbModelToDomain(mcomment comments) domain.Comment {
+func (r commentsRepository) mapCommentDbModelToDomain(comment comments) domain.Comment {
 	return domain.Comment{
-		ID:     mcomment.ID,
-		PostID: mcomment.PostID,
-		Name:   mcomment.Name,
-		Email:  mcomment.Email,
-		Body:   mcomment.Body,
+		ID:          comment.ID,
+		PostID:      comment.PostID,
+		Name:        comment.Name,
+		Email:       comment.Email,
+		Body:        comment.Body,
+		CreatedDate: comment.CreatedDate,
+		DeletedDate: comment.DeletedDate,
+		UpdatedDate: comment.UpdatedDate,
 	}
+}
+
+func (r commentsRepository) mapCommentCollection(comment []comments) []domain.Comment {
+	var result []domain.Comment
+	for _, coll := range comment {
+		newComment := r.mapCommentDbModelToDomain(coll)
+		result = append(result, newComment)
+	}
+	return result
 }

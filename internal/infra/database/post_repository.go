@@ -3,22 +3,27 @@ package database
 import (
 	"fmt"
 	"github.com/upper/db/v4"
+	"time"
 	"trainee/internal/domain"
 )
 
 const PostTable = "posts"
 
 type posts struct {
-	UserId int    `db:"user_id"`
-	Id     int    `db:"id,omitempty"`
-	Title  string `db:"title"`
-	Body   string `db:"body"`
+	UserID      int64      `db:"user_id"`
+	ID          int64      `db:"id,omitempty"`
+	Title       string     `db:"title"`
+	Body        string     `db:"body"`
+	CreatedDate time.Time  `db:"created_date,omitempty"`
+	UpdatedDate time.Time  `db:"updated_date"`
+	DeletedDate *time.Time `db:"deleted_date,omitempty"`
 }
 
 //go:generate mockery --dir . --name PostRepo --output ./mock
 type PostRepo interface {
 	SavePost(post domain.Post) (domain.Post, error)
 	GetPost(id int64) (domain.Post, error)
+	GetPostsByUser(userID int64) ([]domain.Post, error)
 	UpdatePost(post domain.Post) (domain.Post, error)
 	DeletePost(id int64) error
 }
@@ -35,6 +40,8 @@ func NewPostRepository(dbSession db.Session) PostRepo {
 
 func (r postsRepository) SavePost(post domain.Post) (domain.Post, error) {
 	postDB := r.mapPostDBModel(post)
+	postDB.CreatedDate = time.Now()
+	postDB.UpdatedDate = time.Now()
 	err := r.coll.InsertReturning(&postDB)
 	if err != nil {
 		return domain.Post{}, fmt.Errorf("PostRepository Create: %w", err)
@@ -45,7 +52,10 @@ func (r postsRepository) SavePost(post domain.Post) (domain.Post, error) {
 func (r postsRepository) GetPost(id int64) (domain.Post, error) {
 	var post posts
 
-	err := r.coll.Find(db.Cond{"id": id}).One(&post)
+	err := r.coll.Find(db.Cond{
+		"id":           id,
+		"deleted_date": nil,
+	}).One(&post)
 	if err != nil {
 		return domain.Post{}, fmt.Errorf("PostRepository GetPost: %w", err)
 	}
@@ -54,39 +64,42 @@ func (r postsRepository) GetPost(id int64) (domain.Post, error) {
 
 func (r postsRepository) UpdatePost(post domain.Post) (domain.Post, error) {
 	updatePost := r.mapPostDBModel(post)
+	updatePost.UpdatedDate = time.Now()
 
-	err := r.coll.Find(db.Cond{"id": updatePost.Id}).Update(&updatePost)
+	err := r.coll.Find(db.Cond{"id": updatePost.ID}).Update(&updatePost)
 	if err != nil {
 		return domain.Post{}, fmt.Errorf("PostRepository UpdatePost: %w", err)
 	}
 
-	err = r.coll.Find(db.Cond{"id": updatePost.Id}).One(&updatePost)
-	if err != nil {
-		return domain.Post{}, err
-	}
+	//err = r.coll.Find(db.Cond{"id": updatePost.ID}).One(&updatePost)
+	//if err != nil {
+	//	return domain.Post{}, err
+	//}
 	return r.mapPostDbModelToDomain(updatePost), nil
 }
 
 func (r postsRepository) DeletePost(id int64) error {
-	var post posts
+	return r.coll.Find(db.Cond{
+		"id":           id,
+		"deleted_date": nil,
+	}).Update(map[string]interface{}{"deleted_date": time.Now()})
+}
 
-	fiendPost := r.coll.Find(db.Cond{"id":id})
+func (r postsRepository) GetPostsByUser(userID int64) ([]domain.Post, error) {
+	var post []posts
 
-	err := fiendPost.One(&post)
+	err := r.coll.Find(db.Cond{"user_id": userID}).All(&post)
 	if err != nil {
-		return fmt.Errorf("PostRepository Delete: %w", err)
+		return []domain.Post{}, err
 	}
-	err = fiendPost.Delete()
-	if err != nil {
-		return fmt.Errorf("PostRepository Delete: %w", err)
-	}
-	return nil
+	return r.mapPostCollection(post), nil
+
 }
 
 func (r postsRepository) mapPostDBModel(p domain.Post) posts {
 	return posts{
-		UserId: p.UserId,
-		Id:     p.Id,
+		UserID: p.UserID,
+		ID:     p.ID,
 		Title:  p.Title,
 		Body:   p.Body,
 	}
@@ -94,9 +107,21 @@ func (r postsRepository) mapPostDBModel(p domain.Post) posts {
 
 func (r postsRepository) mapPostDbModelToDomain(p posts) domain.Post {
 	return domain.Post{
-		UserId: p.UserId,
-		Id:     p.Id,
-		Title:  p.Title,
-		Body:   p.Body,
+		UserID:      p.UserID,
+		ID:          p.ID,
+		Title:       p.Title,
+		Body:        p.Body,
+		CreatedDate: p.CreatedDate,
+		UpdatedDate: p.UpdatedDate,
+		DeletedDate: p.DeletedDate,
 	}
+}
+
+func (r postsRepository) mapPostCollection(post []posts) []domain.Post {
+	var result []domain.Post
+	for _, coll := range post {
+		newPost := r.mapPostDbModelToDomain(coll)
+		result = append(result, newPost)
+	}
+	return result
 }

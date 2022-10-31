@@ -18,11 +18,14 @@ type Container struct {
 type Services struct {
 	app.CommentService
 	app.PostService
+	app.UserService
+	app.AuthService
 }
 
 type Handlers struct {
 	handlers.CommentHandler
 	handlers.PostHandler
+	handlers.RegisterHandler
 }
 
 func New(conf config.Configuration) Container {
@@ -36,14 +39,22 @@ func New(conf config.Configuration) Container {
 	postService := app.NewPostService(postRepository)
 	postHandler := handlers.NewPostHandler(postService)
 
+	userRepository := database.NewUSerRepo(sess)
+	userService := app.NewUserService(userRepository)
+	authService := app.NewAuthService(userService, conf)
+	registerController := handlers.NewRegisterHandler(userService, authService)
+
 	return Container{
 		Services: Services{
 			commentService,
 			postService,
+			userService,
+			authService,
 		},
 		Handlers: Handlers{
 			commentHandler,
 			postHandler,
+			registerController,
 		},
 	}
 }
