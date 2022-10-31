@@ -10,7 +10,7 @@ import (
 	"strings"
 	"trainee/internal/app"
 	"trainee/internal/domain"
-	"trainee/internal/infra/requests"
+	"trainee/internal/infra/http/requests"
 )
 
 type CommentHandler struct {

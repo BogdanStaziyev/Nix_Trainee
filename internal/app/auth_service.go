@@ -17,7 +17,7 @@ const (
 )
 
 type AuthService interface {
-	Register(user domain.User) (domain.User, string, error)
+	Register(user domain.User) (domain.User, error)
 	Login(user domain.User) (domain.User, string, error)
 	CreateRefreshToken(user domain.User) (string, error)
 	CreateAccessToken(user domain.User) (string, int64, error)
@@ -35,25 +35,24 @@ func NewAuthService(us UserService, cf config.Configuration) AuthService {
 	}
 }
 
-func (a authService) Register(user domain.User) (domain.User, string, error) {
+func (a authService) Register(user domain.User) (domain.User, error) {
 	_, err := a.userService.FindByEmail(user.Email)
 	if err == nil {
-		log.Println("invalid credentials")
-		return domain.User{}, "", err
+		log.Println("invalid credentials user exist")
+		return domain.User{}, errors.New("invalid credentials user exist")
 		//todo wraper
 	} else if !errors.Is(err, db.ErrNoMoreRows) {
 		//todo wraper
 		log.Println(err)
-		return domain.User{}, "", err
+		return domain.User{}, err
 	}
 	user, err = a.userService.Save(user)
 	if err != nil {
 		//todo wraper
 		log.Println(err)
-		return domain.User{}, "", err
+		return domain.User{}, err
 	}
-	token, err := a.CreateRefreshToken(user)
-	return user, token, err
+	return user, nil
 }
 
 func (a authService) Login(user domain.User) (domain.User, string, error) {

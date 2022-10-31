@@ -22,7 +22,6 @@ func EchoRouter(cont container.Container) http.Handler {
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	e.POST("/register", cont.RegisterHandler.Register)
 	e.POST("/login", cont.RegisterHandler.Login)
-	e.POST("/refresh", cont.RegisterHandler.RefreshToken)
 
 	v1 := e.Group("/api/v1")
 	v1.GET("", PingHandler)
