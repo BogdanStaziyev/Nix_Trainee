@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"trainee/internal/domain"
 	"trainee/internal/infra/database"
 )
@@ -34,11 +35,13 @@ func (s postService) GetPost(id int64) (domain.Post, error) {
 	if err != nil {
 		return domain.Post{}, err
 	}
-	post.Comment, err = s.service.GetCommentsByPostID(id)
-	if err != nil {
-		return domain.Post{}, err
-	}
-	return post, err
+	log.Println(post)
+	//todo fix domain comment
+	//comment, err := s.service.GetCommentsByPostID(id)
+	//if err == nil {
+	//	post.Comment = comment
+	//}
+	return post, nil
 }
 
 func (s postService) UpdatePost(post domain.Post) (domain.Post, error) {

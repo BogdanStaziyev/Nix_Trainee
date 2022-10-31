@@ -38,14 +38,14 @@ func EchoRouter(cont container.Container) http.Handler {
 	commRouter.Use(middleware.JWTWithConfig(conf))
 	postRouter.Use(middleware.JWTWithConfig(conf))
 
-	commRouter.POST("save", cont.CommentHandler.SaveComment)
+	commRouter.POST("save/:post_id", cont.CommentHandler.SaveComment)
 	commRouter.GET("comment/:id", cont.CommentHandler.GetComment)
-	commRouter.PUT("update", cont.CommentHandler.UpdateComment)
+	commRouter.PUT("update/:id", cont.CommentHandler.UpdateComment)
 	commRouter.DELETE("delete/:id", cont.CommentHandler.DeleteComment)
 
 	postRouter.POST("save", cont.PostHandler.SavePost)
 	postRouter.GET("post/:id", cont.PostHandler.GetPost)
-	postRouter.PUT("update", cont.PostHandler.UpdatePost)
+	postRouter.PUT("update/:id", cont.PostHandler.UpdatePost)
 	postRouter.DELETE("delete/:id", cont.PostHandler.DeletePost)
 	return e
 }

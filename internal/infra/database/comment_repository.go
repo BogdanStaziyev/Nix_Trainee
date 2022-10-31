@@ -7,7 +7,7 @@ import (
 	"trainee/internal/domain"
 )
 
-const CommentTable = "comments"
+const CommentTable = "commentses"
 
 type comments struct {
 	ID          int64      `db:"id,omitempty"`
@@ -24,7 +24,7 @@ type comments struct {
 type CommentRepo interface {
 	SaveComment(comment domain.Comment) (domain.Comment, error)
 	GetComment(id int64) (domain.Comment, error)
-	UpdateComment(comment domain.Comment) (domain.Comment, error)
+	UpdateComment(comment string, id int64) (domain.Comment, error)
 	DeleteComment(id int64) error
 	GetCommentsByPostID(postID int64) ([]domain.Comment, error)
 }
@@ -63,19 +63,13 @@ func (r commentsRepository) GetComment(id int64) (domain.Comment, error) {
 	return r.mapCommentDbModelToDomain(comment), nil
 }
 
-func (r commentsRepository) UpdateComment(comment domain.Comment) (domain.Comment, error) {
-	updateComment := r.mapCommentDBModel(comment)
-	updateComment.UpdatedDate = time.Now()
-
-	err := r.coll.Find(db.Cond{"id": updateComment.ID}).Update(&updateComment)
+func (r commentsRepository) UpdateComment(comment string, id int64) (domain.Comment, error) {
+	var updateComment comments
+	err := r.coll.Find(db.Cond{"id": id}).One(&updateComment)
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("CommentRepository UpdateComment: %w", err)
 	}
-
-	//err = r.coll.Find(db.Cond{"id": updateComment.ID}).One(&updateComment)
-	//if err != nil {
-	//	return domain.Comment{}, err
-	//}
+	updateComment.Body = comment
 	return r.mapCommentDbModelToDomain(updateComment), nil
 }
 

@@ -31,18 +31,18 @@ type Handlers struct {
 func New(conf config.Configuration) Container {
 	sess := getDbSess(conf)
 
-	commentRepository := database.NewCommentRepository(sess)
-	commentService := app.NewCommentService(commentRepository)
-	commentHandler := handlers.NewCommentHandler(commentService)
+	userRepository := database.NewUSerRepo(sess)
+	userService := app.NewUserService(userRepository)
+	authService := app.NewAuthService(userService, conf)
+	registerController := handlers.NewRegisterHandler(userService, authService)
 
 	postRepository := database.NewPostRepository(sess)
 	postService := app.NewPostService(postRepository)
 	postHandler := handlers.NewPostHandler(postService)
 
-	userRepository := database.NewUSerRepo(sess)
-	userService := app.NewUserService(userRepository)
-	authService := app.NewAuthService(userService, conf)
-	registerController := handlers.NewRegisterHandler(userService, authService)
+	commentRepository := database.NewCommentRepository(sess)
+	commentService := app.NewCommentService(commentRepository)
+	commentHandler := handlers.NewCommentHandler(commentService, userService)
 
 	return Container{
 		Services: Services{

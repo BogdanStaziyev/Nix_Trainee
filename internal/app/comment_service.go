@@ -9,7 +9,7 @@ import (
 type CommentService interface {
 	SaveComment(comment domain.Comment) (domain.Comment, error)
 	GetComment(id int64) (domain.Comment, error)
-	UpdateComment(comment domain.Comment) (domain.Comment, error)
+	UpdateComment(comment string, id int64) (domain.Comment, error)
 	DeleteComment(id int64) error
 	GetCommentsByPostID(postID int64) ([]domain.Comment, error)
 }
@@ -32,8 +32,8 @@ func (s commentService) GetComment(id int64) (domain.Comment, error) {
 	return s.repo.GetComment(id)
 }
 
-func (s commentService) UpdateComment(comment domain.Comment) (domain.Comment, error) {
-	return s.repo.UpdateComment(comment)
+func (s commentService) UpdateComment(comment string, id int64) (domain.Comment, error) {
+	return s.repo.UpdateComment(comment, id)
 }
 
 func (s commentService) DeleteComment(id int64) error {

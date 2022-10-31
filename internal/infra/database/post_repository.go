@@ -65,16 +65,17 @@ func (r postsRepository) GetPost(id int64) (domain.Post, error) {
 func (r postsRepository) UpdatePost(post domain.Post) (domain.Post, error) {
 	updatePost := r.mapPostDBModel(post)
 	updatePost.UpdatedDate = time.Now()
-
-	err := r.coll.Find(db.Cond{"id": updatePost.ID}).Update(&updatePost)
+	err := r.coll.Find(db.Cond{
+		"id":           updatePost.ID,
+		"deleted_date": nil,
+	}).Update(&updatePost)
 	if err != nil {
 		return domain.Post{}, fmt.Errorf("PostRepository UpdatePost: %w", err)
 	}
-
-	//err = r.coll.Find(db.Cond{"id": updatePost.ID}).One(&updatePost)
-	//if err != nil {
-	//	return domain.Post{}, err
-	//}
+	err = r.coll.Find(db.Cond{"id": updatePost.ID}).One(&updatePost)
+	if err != nil {
+		return domain.Post{}, err
+	}
 	return r.mapPostDbModelToDomain(updatePost), nil
 }
 

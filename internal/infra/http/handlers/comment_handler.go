@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"log"
@@ -49,19 +49,25 @@ func (c CommentHandler) SaveComment(ctx echo.Context) error {
 		log.Print(err)
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 	}
-	postID, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	postID, err := strconv.ParseInt(ctx.Param("post_id"), 10, 64)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not parse comment ID"))
 	}
 	jwtUser := ctx.Get("user").(*jwt.Token)
 	claims := jwtUser.Claims.(*app.JwtAccessClaim)
 	user, err := c.usrService.FindByID(claims.ID)
-
+	if err != nil {
+		log.Printf("SaveComment error, %s", err)
+		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
+			return echo.NewHTTPError(http.StatusNotFound, err)
+		} else {
+			return echo.NewHTTPError(http.StatusInternalServerError, err)
+		}
+	}
 	comment := domain.Comment{
-		ID:     0,
-		PostID: 0,
-		Name:   "",
-		Email:  "",
+		PostID: postID,
+		Name:   user.Name,
+		Email:  user.Email,
 		Body:   commentRequest.Body,
 	}
 	comment, err = c.service.SaveComment(comment)
@@ -112,17 +118,21 @@ func (c CommentHandler) GetComment(ctx echo.Context) error {
 // @Security 		ApiKeyAuth
 // @Router			/comments/update [put]
 func (c CommentHandler) UpdateComment(ctx echo.Context) error {
-	var comment domain.Comment
-	err := ctx.Bind(&comment)
+	var commentRequest requests.CommentRequest
+	err := ctx.Bind(&commentRequest)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not decode comment data"))
 	}
-	err = ctx.Validate(&comment)
+	err = ctx.Validate(&commentRequest)
 	if err != nil {
 		log.Print(err)
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
 	}
-	comment, err = c.service.UpdateComment(comment)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not parse comment ID"))
+	}
+	comment, err := c.service.UpdateComment(commentRequest.Body, id)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
 			return echo.NewHTTPError(http.StatusNotFound, err)

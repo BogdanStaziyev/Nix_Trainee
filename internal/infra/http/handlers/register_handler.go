@@ -10,7 +10,8 @@ import (
 	"trainee/config"
 	"trainee/internal/app"
 	"trainee/internal/domain"
-	"trainee/internal/infra/responses"
+	"trainee/internal/infra/http/response"
+	"trainee/internal/infra/requests"
 )
 
 type RegisterHandler struct {
@@ -50,7 +51,7 @@ func (r RegisterHandler) Register(c echo.Context) error {
 }
 
 func (r RegisterHandler) Login(c echo.Context) error {
-	var authUser domain.AuthUser
+	var authUser requests.LoginAuth
 	if err := c.Bind(&authUser); err != nil {
 		return err
 	}
@@ -69,18 +70,18 @@ func (r RegisterHandler) Login(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	res := responses.NewLoginResponse(accessToken, refreshToken, exp)
+	res := response.NewLoginResponse(accessToken, refreshToken, exp)
 
 	return c.JSON(http.StatusOK, res)
 }
 
 func (r RegisterHandler) RefreshToken(c echo.Context) error {
-	request := new(domain.Refresh)
-	if err := c.Bind(request); err != nil {
+	var refreshToken requests.Refresh
+	if err := c.Bind(&refreshToken); err != nil {
 		return err
 	}
 
-	token, err := jwt.Parse(request.Token, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(refreshToken.Token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected method: %v", token.Header["alg"])
 		}
@@ -102,11 +103,11 @@ func (r RegisterHandler) RefreshToken(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	refreshToken, err := r.as.CreateRefreshToken(user)
+	createRefresh, err := r.as.CreateRefreshToken(user)
 	if err != nil {
 		return err
 	}
-	res := responses.NewLoginResponse(accessToken, refreshToken, exp)
+	res := response.NewLoginResponse(accessToken, createRefresh, exp)
 
 	return c.JSON(http.StatusOK, res)
 }

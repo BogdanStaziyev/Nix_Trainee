@@ -50,8 +50,8 @@ func (u userRepo) FindByEmail(email string) (domain.User, error) {
 	var domainUser user
 
 	err := u.coll.Find(db.Cond{
-		"email":       email,
-		"delete_date": nil,
+		"email":        email,
+		"deleted_date": nil,
 	}).One(&domainUser)
 	if err != nil {
 		return domain.User{}, err
