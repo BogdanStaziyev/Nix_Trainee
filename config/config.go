@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"golang.org/x/oauth2"
+	"os"
+)
 
 type Configuration struct {
 	DatabaseName      string
@@ -11,6 +14,7 @@ type Configuration struct {
 	MigrationLocation string
 	AccessSecret      string
 	RefreshSecret     string
+	OAUTH             oauth2.Config
 }
 
 func GetConfiguration() Configuration {
@@ -33,5 +37,6 @@ func GetConfiguration() Configuration {
 		MigrationLocation: migrationLocation,
 		AccessSecret:      "access",
 		RefreshSecret:     "refresh",
+		OAUTH:             LoadOAUTHConfiguration(),
 	}
 }

@@ -29,13 +29,13 @@ func NewPostHandler(s app.PostService) PostHandler {
 // @Tags			Posts Actions
 // @Accept 			json
 // @Produce 		json
-// @Param			input body domain.Post true "comment info"
+// @Param			input body requests.PostRequest true "comment info"
 // @Success 		201 {object} domain.Post
 // @Failure			400 {object} error
 // @Failure 		422 {object} error
 // @Failure 		500 {object} error
 // @Security        ApiKeyAuth
-// @Router			/posts/save [post]
+// @Router			/api/v1/posts/save [post]
 func (p PostHandler) SavePost(ctx echo.Context) error {
 	var postRequest requests.PostRequest
 	err := ctx.Bind(&postRequest)
@@ -71,7 +71,7 @@ func (p PostHandler) SavePost(ctx echo.Context) error {
 // @Success 		200 {object} domain.Post
 // @Failure 		404 {object} error
 // @Security        ApiKeyAuth
-// @Router			/posts/post/{id} [get]
+// @Router			/api/v1/posts/post/{id} [get]
 func (p PostHandler) GetPost(ctx echo.Context) error {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
@@ -95,11 +95,11 @@ func (p PostHandler) GetPost(ctx echo.Context) error {
 // @Tags			Posts Actions
 // @Accept 			json
 // @Produce 		json
-// @Param			input body domain.Post true "post info"
+// @Param			input body requests.PostRequest true "post info"
 // @Success 		200 {object} domain.Post
 // @Failure 		404 {object} error
 // @Security        ApiKeyAuth
-// @Router			/posts/update [put]
+// @Router			/api/v1/posts/update [put]
 func (p PostHandler) UpdatePost(ctx echo.Context) error {
 	var postRequest requests.PostRequest
 	err := ctx.Bind(&postRequest)
@@ -143,7 +143,7 @@ func (p PostHandler) UpdatePost(ctx echo.Context) error {
 // @Success 		200
 // @Failure 		404 {object} error
 // @Security        ApiKeyAuth
-// @Router			/posts/delete/{id} [delete]
+// @Router			/api/v1/posts/delete/{id} [delete]
 func (p PostHandler) DeletePost(ctx echo.Context) error {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {

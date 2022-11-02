@@ -22,6 +22,17 @@ func NewRegisterHandler(u app.UserService, a app.AuthService) RegisterHandler {
 	}
 }
 
+// Register 		godoc
+// @Summary 		Register
+// @Description 	New user registration
+// @ID				user-register
+// @Tags			Auth Actions
+// @Accept 			json
+// @Produce 		json
+// @Param			input body requests.RegisterAuth true "users email, users password"
+// @Success 		201 {object} domain.User
+// @Failure			400 {object} error
+// @Router			/register [post]
 func (r RegisterHandler) Register(c echo.Context) error {
 	var registerUser requests.RegisterAuth
 	if err := c.Bind(&registerUser); err != nil {
@@ -41,6 +52,18 @@ func (r RegisterHandler) Register(c echo.Context) error {
 	return c.JSON(http.StatusCreated, user)
 }
 
+// Login 			godoc
+// @Summary 		LoginAuth
+// @Description 	LoginAuth
+// @Tags			Auth Actions
+// @Accept 			json
+// @Produce 		json
+// @Param			input body requests.LoginAuth true "users email, users password"
+// @Success 		201 {object} response.LoginResponse
+// @Failure			400 {object} error
+// @Failure			400 {object} error
+// @Failure			401 {object} error
+// @Router			/login [post]
 func (r RegisterHandler) Login(c echo.Context) error {
 	var authUser requests.LoginAuth
 	if err := c.Bind(&authUser); err != nil {

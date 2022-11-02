@@ -16,7 +16,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/comments/comment/{id}": {
+        "/api/v1/comments/comment/{id}": {
             "get": {
                 "security": [
                     {
@@ -54,7 +54,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/comments/delete/{id}": {
+        "/api/v1/comments/delete/{id}": {
             "delete": {
                 "security": [
                     {
@@ -86,7 +86,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/comments/save": {
+        "/api/v1/comments/save": {
             "post": {
                 "security": [
                     {
@@ -111,7 +111,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/requests.CommentRequest"
                         }
                     }
                 ],
@@ -119,7 +119,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/response.CommentResponse"
                         }
                     },
                     "400": {
@@ -137,7 +137,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/comments/update": {
+        "/api/v1/comments/update": {
             "put": {
                 "security": [
                     {
@@ -162,7 +162,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/requests.CommentRequest"
                         }
                     }
                 ],
@@ -184,7 +184,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/delete/{id}": {
+        "/api/v1/posts/delete/{id}": {
             "delete": {
                 "security": [
                     {
@@ -219,7 +219,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/post/{id}": {
+        "/api/v1/posts/post/{id}": {
             "get": {
                 "security": [
                     {
@@ -257,7 +257,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/save": {
+        "/api/v1/posts/save": {
             "post": {
                 "security": [
                     {
@@ -282,7 +282,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/requests.PostRequest"
                         }
                     }
                 ],
@@ -308,7 +308,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/posts/update": {
+        "/api/v1/posts/update": {
             "put": {
                 "security": [
                     {
@@ -333,7 +333,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/requests.PostRequest"
                         }
                     }
                 ],
@@ -350,63 +350,272 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/login": {
+            "post": {
+                "description": "LoginAuth",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth Actions"
+                ],
+                "summary": "LoginAuth",
+                "parameters": [
+                    {
+                        "description": "users email, users password",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.LoginAuth"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "New user registration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth Actions"
+                ],
+                "summary": "Register",
+                "operationId": "user-register",
+                "parameters": [
+                    {
+                        "description": "users email, users password",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.RegisterAuth"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "domain.Comment": {
             "type": "object",
-            "required": [
-                "body",
-                "email",
-                "name",
-                "post_id"
-            ],
             "properties": {
                 "body": {
-                    "type": "string",
-                    "example": "lorem ipsum"
+                    "type": "string"
+                },
+                "createdDate": {
+                    "type": "string"
+                },
+                "deletedDate": {
+                    "type": "string"
                 },
                 "email": {
-                    "type": "string",
-                    "example": "example@mail.com"
+                    "type": "string"
                 },
                 "id": {
-                    "type": "integer",
-                    "example": 1
+                    "type": "integer"
                 },
                 "name": {
-                    "type": "string",
-                    "example": "Bohdan"
+                    "type": "string"
                 },
-                "post_id": {
-                    "type": "integer",
-                    "example": 3
+                "postID": {
+                    "type": "integer"
+                },
+                "updatedDate": {
+                    "type": "string"
                 }
             }
         },
         "domain.Post": {
             "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "createdDate": {
+                    "type": "string"
+                },
+                "deletedDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedDate": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.User": {
+            "type": "object",
+            "properties": {
+                "createdDate": {
+                    "type": "string"
+                },
+                "deletedDate": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "updatedDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.CommentRequest": {
+            "type": "object",
+            "required": [
+                "body"
+            ],
+            "properties": {
+                "body": {
+                    "type": "string",
+                    "example": "lorem ipsum"
+                }
+            }
+        },
+        "requests.LoginAuth": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@email.com"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "01234567890"
+                }
+            }
+        },
+        "requests.PostRequest": {
+            "type": "object",
             "required": [
                 "body",
-                "title",
-                "user_id"
+                "title"
             ],
             "properties": {
                 "body": {
                     "type": "string",
                     "example": "Lorem ipsum"
                 },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
                 "title": {
                     "type": "string",
                     "example": "Lorem ipsum"
+                }
+            }
+        },
+        "requests.RegisterAuth": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@email.com"
                 },
-                "user_id": {
-                    "type": "integer",
-                    "example": 1
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "01234567890"
+                }
+            }
+        },
+        "response.CommentResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "post_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "exp": {
+                    "type": "integer"
+                },
+                "refreshToken": {
+                    "type": "string"
                 }
             }
         }
@@ -423,10 +632,10 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "V1.echo",
-	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	Host:             "localhost:8000",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "NIX TRAINEE PROGRAM Dmo App",
+	Title:            "NIX TRAINEE PROGRAM Demo App",
 	Description:      "REST service for NIX TRAINEE PROGRAM",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
