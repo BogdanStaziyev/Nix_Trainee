@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"trainee/internal/domain"
 	"trainee/internal/infra/database"
 )
@@ -11,10 +12,12 @@ type PostService interface {
 	GetPost(id int64) (domain.Post, error)
 	UpdatePost(post domain.Post) (domain.Post, error)
 	DeletePost(id int64) error
+	GetPostsByUser(userID int64) ([]domain.Post, error)
 }
 
 type postService struct {
-	repo database.PostRepo
+	repo    database.PostRepo
+	service CommentService
 }
 
 func NewPostService(repo database.PostRepo) PostService {
@@ -28,7 +31,17 @@ func (s postService) SavePost(post domain.Post) (domain.Post, error) {
 }
 
 func (s postService) GetPost(id int64) (domain.Post, error) {
-	return s.repo.GetPost(id)
+	post, err := s.repo.GetPost(id)
+	if err != nil {
+		return domain.Post{}, err
+	}
+	log.Println(post)
+	//todo fix domain comment
+	//comment, err := s.service.GetCommentsByPostID(id)
+	//if err == nil {
+	//	post.Comment = comment
+	//}
+	return post, nil
 }
 
 func (s postService) UpdatePost(post domain.Post) (domain.Post, error) {
@@ -37,4 +50,8 @@ func (s postService) UpdatePost(post domain.Post) (domain.Post, error) {
 
 func (s postService) DeletePost(id int64) error {
 	return s.repo.DeletePost(id)
+}
+
+func (s postService) GetPostsByUser(userID int64) ([]domain.Post, error) {
+	return s.repo.GetPostsByUser(userID)
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"strings"
 	"trainee/internal/app"
 	"trainee/internal/domain"
+	"trainee/internal/infra/http/requests"
 )
 
 type PostHandler struct {
@@ -35,14 +37,22 @@ func NewPostHandler(s app.PostService) PostHandler {
 // @Security        ApiKeyAuth
 // @Router			/posts/save [post]
 func (p PostHandler) SavePost(ctx echo.Context) error {
-	var post domain.Post
-	err := ctx.Bind(&post)
+	var postRequest requests.PostRequest
+	err := ctx.Bind(&postRequest)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not decode post data"))
 	}
-	err = ctx.Validate(&post)
+	err = ctx.Validate(&postRequest)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+	}
+	user := ctx.Get("user").(*jwt.Token)
+	claims := user.Claims.(*app.JwtAccessClaim)
+	id := claims.ID
+	post := domain.Post{
+		Title:  postRequest.Title,
+		Body:   postRequest.Body,
+		UserID: id,
 	}
 	post, err = p.service.SavePost(post)
 	if err != nil {
@@ -91,14 +101,27 @@ func (p PostHandler) GetPost(ctx echo.Context) error {
 // @Security        ApiKeyAuth
 // @Router			/posts/update [put]
 func (p PostHandler) UpdatePost(ctx echo.Context) error {
-	var post domain.Post
-	err := ctx.Bind(&post)
+	var postRequest requests.PostRequest
+	err := ctx.Bind(&postRequest)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "could not decode post data")
 	}
-	err = ctx.Validate(&post)
+	err = ctx.Validate(&postRequest)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+	}
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not parse post ID"))
+	}
+	user := ctx.Get("user").(*jwt.Token)
+	claims := user.Claims.(*app.JwtAccessClaim)
+	userID := claims.ID
+	post := domain.Post{
+		Title:  postRequest.Title,
+		Body:   postRequest.Body,
+		UserID: userID,
+		ID:     id,
 	}
 	post, err = p.service.UpdatePost(post)
 	if err != nil {

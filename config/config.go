@@ -9,6 +9,8 @@ type Configuration struct {
 	DatabasePassword  string
 	MigrateToVersion  string
 	MigrationLocation string
+	AccessSecret      string
+	RefreshSecret     string
 }
 
 func GetConfiguration() Configuration {
@@ -29,5 +31,7 @@ func GetConfiguration() Configuration {
 		DatabasePassword:  `password`,
 		MigrateToVersion:  migrateToVersion,
 		MigrationLocation: migrationLocation,
+		AccessSecret:      "access",
+		RefreshSecret:     "refresh",
 	}
 }

@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{    \r\n    \"post_id\": 2,\r\n    \"name\": \"23213\",          \r\n    \"email\": \"2323\",\r\n    \"body\": \"2321321\"\r\n}",
+							"raw": "{    \r\n    \"body\": \"body\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -24,13 +24,20 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/comments/save",
+							"raw": "{{url}}/comments/save/:post_id",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"comments",
-								"save"
+								"save",
+								":post_id"
+							],
+							"variable": [
+								{
+									"key": "post_id",
+									"value": "4"
+								}
 							]
 						}
 					},
@@ -54,7 +61,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "4"
+									"value": "6"
 								}
 							]
 						}
@@ -68,7 +75,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{    \r\n    \"id\": 42,\r\n    \"post_id\": 3,\r\n    \"name\": \"123123123\",          \r\n    \"email\": \"34534534\",\r\n    \"body\": \"61231231231236\"\r\n}",
+							"raw": "{    \r\n    \"body\": \"new body\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -76,13 +83,20 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/comments/update",
+							"raw": "{{url}}/comments/update/:id",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"comments",
-								"update"
+								"update",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "6"
+								}
 							]
 						}
 					},
@@ -106,7 +120,7 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "1"
+									"value": "6"
 								}
 							]
 						}
@@ -125,7 +139,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{    \r\n    \"user_id\": 2,\r\n    \"title\": \"2323\",\r\n    \"body\": \"2321321\"\r\n}",
+							"raw": "{    \r\n    \"title\": \"title\",\r\n    \"body\": \"body\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -177,7 +191,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{    \r\n    \"id\": 4,\r\n    \"user_id\": 2,\r\n\t\"title\": \"2231\",\r\n\t\"body\": \" string\"\r\n}\r\n",
+							"raw": "{    \r\n\t\"title\": \"new title\",\r\n\t\"body\": \"new body\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -185,13 +199,20 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/posts/update",
+							"raw": "{{url}}/posts/update/:id",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"posts",
-								"update"
+								"update",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "4"
+								}
 							]
 						}
 					},
@@ -215,8 +236,67 @@
 							"variable": [
 								{
 									"key": "id",
-									"value": "10"
+									"value": "4"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "LoginUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"email@mail.com\",\r\n    \"password\": \"qwerty12345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RegisterUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"email@mail.com\",\r\n    \"password\": \"qwerty12345\",\r\n    \"name\": \"James\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/register",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"register"
 							]
 						}
 					},
@@ -239,6 +319,16 @@
 			"response": []
 		}
 	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSmFtZXMiLCJpZCI6NywiZXhwIjoxNjY3MzgzMTczfQ.kjmjFi4PEbLLRz1dQFLxul-UiZJRylGGpR2FSRaT8hU",
+				"type": "string"
+			}
+		]
+	},
 	"event": [
 		{
 			"listen": "prerequest",
