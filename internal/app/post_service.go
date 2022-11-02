@@ -16,8 +16,7 @@ type PostService interface {
 }
 
 type postService struct {
-	repo    database.PostRepo
-	service CommentService
+	repo database.PostRepo
 }
 
 func NewPostService(repo database.PostRepo) PostService {

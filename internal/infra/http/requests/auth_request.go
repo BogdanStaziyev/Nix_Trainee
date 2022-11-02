@@ -19,10 +19,10 @@ type Refresh struct {
 	Token string `json:"token" validate:"required" example:"refresh_token"`
 }
 
-func (r RegisterAuth) RegisterToUser() (domain.User, error) {
+func (r RegisterAuth) RegisterToUser() domain.User {
 	return domain.User{
 		Email:    r.Email,
 		Name:     r.Name,
 		Password: r.Password,
-	}, nil
+	}
 }

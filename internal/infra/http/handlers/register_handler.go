@@ -31,7 +31,7 @@ func (r RegisterHandler) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Empty or not valid")
 	}
 
-	userFromRegister, err := registerUser.RegisterToUser()
+	userFromRegister := registerUser.RegisterToUser()
 
 	user, err := r.as.Register(userFromRegister)
 	if err != nil {
@@ -50,6 +50,9 @@ func (r RegisterHandler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "files not empty")
 	}
 	user, err := r.us.FindByEmail(authUser.Email)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "user not exist")
+	}
 	if user.ID == 0 || (bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(authUser.Password)) != nil) {
 		return echo.NewHTTPError(http.StatusUnauthorized, "invalid credentials")
 	}
