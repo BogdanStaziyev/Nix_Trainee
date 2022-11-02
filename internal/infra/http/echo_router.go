@@ -1,10 +1,8 @@
 package http
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/swaggo/echo-swagger"
-	"net/http"
 	"trainee/config"
 	"trainee/config/container"
 	"trainee/internal/app"
@@ -13,9 +11,9 @@ import (
 	_ "trainee/docs"
 )
 
-func EchoRouter(cont container.Container) http.Handler {
+func EchoRouter(s *Server, cont container.Container) {
 
-	e := echo.New()
+	e := s.Echo
 	e.Use(middleware.Logger())
 	e.Validator = validators.NewValidator()
 
@@ -46,5 +44,4 @@ func EchoRouter(cont container.Container) http.Handler {
 	postRouter.GET("post/:id", cont.PostHandler.GetPost)
 	postRouter.PUT("update/:id", cont.PostHandler.UpdatePost)
 	postRouter.DELETE("delete/:id", cont.PostHandler.DeletePost)
-	return e
 }
