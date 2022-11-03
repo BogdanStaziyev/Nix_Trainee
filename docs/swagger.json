@@ -2,14 +2,14 @@
     "swagger": "2.0",
     "info": {
         "description": "REST service for NIX TRAINEE PROGRAM",
-        "title": "NIX TRAINEE PROGRAM Dmo App",
+        "title": "NIX TRAINEE PROGRAM Demo App",
         "contact": {},
         "version": "V1.echo"
     },
-    "host": "localhost:8080",
-    "basePath": "/api/v1",
+    "host": "localhost:8000",
+    "basePath": "/",
     "paths": {
-        "/comments/comment/{id}": {
+        "/api/v1/comments/comment/{id}": {
             "get": {
                 "security": [
                     {
@@ -37,17 +37,31 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/response.CommentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/comments/delete/{id}": {
+        "/api/v1/comments/delete/{id}": {
             "delete": {
                 "security": [
                     {
@@ -70,16 +84,33 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Data"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/comments/save": {
+        "/api/v1/comments/save/{post_id}": {
             "post": {
                 "security": [
                     {
@@ -99,12 +130,19 @@
                 "summary": "Save Comment",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "PostID",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "comment info",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/requests.CommentRequest"
                         }
                     }
                 ],
@@ -112,25 +150,31 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/response.CommentResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/comments/update": {
+        "/api/v1/comments/update/{id}": {
             "put": {
                 "security": [
                     {
@@ -150,12 +194,19 @@
                 "summary": "Update Comment",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "comment info",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/requests.CommentRequest"
                         }
                     }
                 ],
@@ -163,21 +214,31 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/response.CommentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/posts/delete/{id}": {
+        "/api/v1/posts/delete/{id}": {
             "delete": {
                 "security": [
                     {
@@ -203,16 +264,33 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Data"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/posts/post/{id}": {
+        "/api/v1/posts/post/{id}": {
             "get": {
                 "security": [
                     {
@@ -240,17 +318,31 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/response.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/posts/save": {
+        "/api/v1/posts/save": {
             "post": {
                 "security": [
                     {
@@ -275,7 +367,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/requests.PostRequest"
                         }
                     }
                 ],
@@ -283,25 +375,31 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/response.PostResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/posts/update": {
+        "/api/v1/posts/update/{id}": {
             "put": {
                 "security": [
                     {
@@ -321,12 +419,19 @@
                 "summary": "Update Post",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "post info",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/requests.PostRequest"
                         }
                     }
                 ],
@@ -334,26 +439,197 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/response.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "LoginAuth",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth Actions"
+                ],
+                "summary": "LoginAuth",
+                "parameters": [
+                    {
+                        "description": "users email, users password",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.LoginAuth"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "New user registration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth Actions"
+                ],
+                "summary": "Register",
+                "operationId": "user-register",
+                "parameters": [
+                    {
+                        "description": "users email, users password",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.RegisterAuth"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
-        "domain.Comment": {
+        "requests.CommentRequest": {
+            "type": "object",
+            "required": [
+                "body"
+            ],
+            "properties": {
+                "body": {
+                    "type": "string",
+                    "example": "lorem ipsum"
+                }
+            }
+        },
+        "requests.LoginAuth": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@email.com"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "01234567890"
+                }
+            }
+        },
+        "requests.PostRequest": {
             "type": "object",
             "required": [
                 "body",
+                "title"
+            ],
+            "properties": {
+                "body": {
+                    "type": "string",
+                    "example": "Lorem ipsum"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Lorem ipsum"
+                }
+            }
+        },
+        "requests.RegisterAuth": {
+            "type": "object",
+            "required": [
                 "email",
                 "name",
-                "post_id"
+                "password"
             ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@email.com"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "01234567890"
+                }
+            }
+        },
+        "response.CommentResponse": {
+            "type": "object",
             "properties": {
                 "body": {
                     "type": "string",
@@ -361,7 +637,7 @@
                 },
                 "email": {
                     "type": "string",
-                    "example": "example@mail.com"
+                    "example": "example@email.com"
                 },
                 "id": {
                     "type": "integer",
@@ -369,21 +645,52 @@
                 },
                 "name": {
                     "type": "string",
-                    "example": "Bohdan"
+                    "example": "Bob"
                 },
                 "post_id": {
                     "type": "integer",
-                    "example": 3
+                    "example": 1
                 }
             }
         },
-        "domain.Post": {
+        "response.Data": {
             "type": "object",
-            "required": [
-                "body",
-                "title",
-                "user_id"
-            ],
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "exp": {
+                    "type": "integer"
+                },
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.PostResponse": {
+            "type": "object",
             "properties": {
                 "body": {
                     "type": "string",
@@ -400,6 +707,20 @@
                 "user_id": {
                     "type": "integer",
                     "example": 1
+                }
+            }
+        },
+        "response.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         }

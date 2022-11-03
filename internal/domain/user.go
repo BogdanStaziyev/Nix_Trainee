@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"time"
+	"trainee/internal/infra/http/response"
+)
 
 type User struct {
 	ID          int64
@@ -12,22 +15,10 @@ type User struct {
 	DeletedDate *time.Time
 }
 
-//type AuthUser struct {
-//	Email    string `json:"email" validate:"required"`
-//	Password string `json:"password" validate:"required"`
-//}
-//
-//type RegisterUser struct {
-//	AuthUser
-//	Name string `json:"name" validate:"required"`
-//}
-//
-//type Refresh struct {
-//	Token string `json:"token" validate:"required"`
-//}
-
-//ID       int64  `json:"id"`
-//Email    string `json:"email" validate:"required,email"`
-//Name     string `json:"name" validate:"required,gte=3"`
-//Password string `json:"password" validate:"required,gte=8"`
-//Post     []Post
+func (u User) DomainToResponse() response.UserResponse {
+	return response.UserResponse{
+		ID:    u.ID,
+		Email: u.Email,
+		Name:  u.Name,
+	}
+}

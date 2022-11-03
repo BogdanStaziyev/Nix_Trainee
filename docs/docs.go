@@ -16,7 +16,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/comments/comment/{id}": {
+        "/api/v1/comments/comment/{id}": {
             "get": {
                 "security": [
                     {
@@ -44,17 +44,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/response.CommentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/comments/delete/{id}": {
+        "/api/v1/comments/delete/{id}": {
             "delete": {
                 "security": [
                     {
@@ -77,16 +91,33 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Data"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/comments/save": {
+        "/api/v1/comments/save/{post_id}": {
             "post": {
                 "security": [
                     {
@@ -106,12 +137,19 @@ const docTemplate = `{
                 "summary": "Save Comment",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "PostID",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "comment info",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/requests.CommentRequest"
                         }
                     }
                 ],
@@ -119,25 +157,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/response.CommentResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/comments/update": {
+        "/api/v1/comments/update/{id}": {
             "put": {
                 "security": [
                     {
@@ -157,12 +201,19 @@ const docTemplate = `{
                 "summary": "Update Comment",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "comment info",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/requests.CommentRequest"
                         }
                     }
                 ],
@@ -170,21 +221,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/response.CommentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/posts/delete/{id}": {
+        "/api/v1/posts/delete/{id}": {
             "delete": {
                 "security": [
                     {
@@ -210,16 +271,33 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Data"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/posts/post/{id}": {
+        "/api/v1/posts/post/{id}": {
             "get": {
                 "security": [
                     {
@@ -247,17 +325,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/response.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/posts/save": {
+        "/api/v1/posts/save": {
             "post": {
                 "security": [
                     {
@@ -282,7 +374,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/requests.PostRequest"
                         }
                     }
                 ],
@@ -290,25 +382,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/response.PostResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/posts/update": {
+        "/api/v1/posts/update/{id}": {
             "put": {
                 "security": [
                     {
@@ -328,12 +426,19 @@ const docTemplate = `{
                 "summary": "Update Post",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "post info",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/requests.PostRequest"
                         }
                     }
                 ],
@@ -341,26 +446,197 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/response.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "LoginAuth",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth Actions"
+                ],
+                "summary": "LoginAuth",
+                "parameters": [
+                    {
+                        "description": "users email, users password",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.LoginAuth"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "New user registration",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth Actions"
+                ],
+                "summary": "Register",
+                "operationId": "user-register",
+                "parameters": [
+                    {
+                        "description": "users email, users password",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requests.RegisterAuth"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
-        "domain.Comment": {
+        "requests.CommentRequest": {
+            "type": "object",
+            "required": [
+                "body"
+            ],
+            "properties": {
+                "body": {
+                    "type": "string",
+                    "example": "lorem ipsum"
+                }
+            }
+        },
+        "requests.LoginAuth": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@email.com"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "01234567890"
+                }
+            }
+        },
+        "requests.PostRequest": {
             "type": "object",
             "required": [
                 "body",
+                "title"
+            ],
+            "properties": {
+                "body": {
+                    "type": "string",
+                    "example": "Lorem ipsum"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Lorem ipsum"
+                }
+            }
+        },
+        "requests.RegisterAuth": {
+            "type": "object",
+            "required": [
                 "email",
                 "name",
-                "post_id"
+                "password"
             ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "example@email.com"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "example": "01234567890"
+                }
+            }
+        },
+        "response.CommentResponse": {
+            "type": "object",
             "properties": {
                 "body": {
                     "type": "string",
@@ -368,7 +644,7 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string",
-                    "example": "example@mail.com"
+                    "example": "example@email.com"
                 },
                 "id": {
                     "type": "integer",
@@ -376,21 +652,52 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string",
-                    "example": "Bohdan"
+                    "example": "Bob"
                 },
                 "post_id": {
                     "type": "integer",
-                    "example": 3
+                    "example": 1
                 }
             }
         },
-        "domain.Post": {
+        "response.Data": {
             "type": "object",
-            "required": [
-                "body",
-                "title",
-                "user_id"
-            ],
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "type": "string"
+                },
+                "exp": {
+                    "type": "integer"
+                },
+                "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.PostResponse": {
+            "type": "object",
             "properties": {
                 "body": {
                     "type": "string",
@@ -409,6 +716,20 @@ const docTemplate = `{
                     "example": 1
                 }
             }
+        },
+        "response.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {
@@ -423,10 +744,10 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "V1.echo",
-	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	Host:             "localhost:8000",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "NIX TRAINEE PROGRAM Dmo App",
+	Title:            "NIX TRAINEE PROGRAM Demo App",
 	Description:      "REST service for NIX TRAINEE PROGRAM",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

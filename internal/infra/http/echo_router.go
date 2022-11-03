@@ -14,6 +14,8 @@ import (
 func EchoRouter(s *Server, cont container.Container) {
 
 	e := s.Echo
+	e.GET("/auth/google/login", cont.OauthHandler.GetInfo)
+	e.GET("/auth/google/callback", cont.OauthHandler.CallBackRegister)
 	e.Use(middleware.Logger())
 	e.Validator = validators.NewValidator()
 

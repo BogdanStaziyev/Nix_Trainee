@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,6 +11,7 @@ import (
 	"trainee/internal/app"
 	"trainee/internal/domain"
 	"trainee/internal/infra/http/requests"
+	"trainee/internal/infra/http/response"
 )
 
 type CommentHandler struct {
@@ -31,27 +32,28 @@ func NewCommentHandler(s app.CommentService, u app.UserService) CommentHandler {
 // @Tags			Comments Actions
 // @Accept 			json
 // @Produce 		json
-// @Param			input body domain.Comment true "comment info"
-// @Success 		201 {object} domain.Comment
-// @Failure			400 {object} error
-// @Failure 		422 {object} error
-// @Failure 		500 {object} error
+// @Param			post_id path int true "PostID"
+// @Param			input body requests.CommentRequest true "comment info"
+// @Success 		201 {object} response.CommentResponse
+// @Failure			400 {object} response.Error
+// @Failure 		422 {object} response.Error
+// @Failure 		500 {object} response.Error
 // @Security        ApiKeyAuth
-// @Router			/comments/save [post]
+// @Router			/api/v1/comments/save/{post_id} [post]
 func (c CommentHandler) SaveComment(ctx echo.Context) error {
 	var commentRequest requests.CommentRequest
 	err := ctx.Bind(&commentRequest)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not decode comment data"))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "could not decode comment data")
 	}
 	err = ctx.Validate(&commentRequest)
 	if err != nil {
 		log.Print(err)
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
 	}
 	postID, err := strconv.ParseInt(ctx.Param("post_id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not parse comment ID"))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "could not parse comment ID")
 	}
 	jwtUser := ctx.Get("user").(*jwt.Token)
 	claims := jwtUser.Claims.(*app.JwtAccessClaim)
@@ -59,9 +61,9 @@ func (c CommentHandler) SaveComment(ctx echo.Context) error {
 	if err != nil {
 		log.Printf("SaveComment error, %s", err)
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return echo.NewHTTPError(http.StatusNotFound, err)
+			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
 		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		}
 	}
 	comment := domain.Comment{
@@ -73,9 +75,10 @@ func (c CommentHandler) SaveComment(ctx echo.Context) error {
 	comment, err = c.service.SaveComment(comment)
 	if err != nil {
 		log.Print(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 	}
-	return ctx.JSON(http.StatusCreated, comment)
+	commentResponse := domain.Comment.DomainToResponse(comment)
+	return response.Response(ctx, http.StatusCreated, commentResponse)
 }
 
 // GetComment 		godoc
@@ -84,25 +87,28 @@ func (c CommentHandler) SaveComment(ctx echo.Context) error {
 // @Tags			Comments Actions
 // @Produce 		json
 // @Param			id path int true "ID"
-// @Success 		200 {object} domain.Comment
-// @Failure			404 {object} error
+// @Success 		200 {object} response.CommentResponse
+// @Failure			400 {object} response.Error
+// @Failure			404 {object} response.Error
+// @Failure			500 {object} response.Error
 // @Security 		ApiKeyAuth
-// @Router			/comments/comment/{id} [get]
+// @Router			/api/v1/comments/comment/{id} [get]
 func (c CommentHandler) GetComment(ctx echo.Context) error {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not parse comment ID"))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "could not parse comment ID")
 	}
 	comment, err := c.service.GetComment(id)
 	if err != nil {
 		log.Print("commentService error", err)
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return echo.NewHTTPError(http.StatusNotFound, err)
+			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
 		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		}
 	}
-	return ctx.JSON(http.StatusOK, comment)
+	commentResponse := domain.Comment.DomainToResponse(comment)
+	return response.Response(ctx, http.StatusOK, commentResponse)
 }
 
 // UpdateComment 	godoc
@@ -111,36 +117,39 @@ func (c CommentHandler) GetComment(ctx echo.Context) error {
 // @Tags			Comments Actions
 // @Accept 			json
 // @Produce 		json
-// @Param			input body domain.Comment true "comment info"
-// @Success 		200 {object} domain.Comment
-// @Failure			422 {object} error
-// @Failure			404 {object} error
+// @Param			id path int true "ID"
+// @Param			input body requests.CommentRequest true "comment info"
+// @Success 		200 {object} response.CommentResponse
+// @Failure			400 {object} response.Error
+// @Failure			422 {object} response.Error
+// @Failure			404 {object} response.Error
 // @Security 		ApiKeyAuth
-// @Router			/comments/update [put]
+// @Router			/api/v1/comments/update/{id} [put]
 func (c CommentHandler) UpdateComment(ctx echo.Context) error {
 	var commentRequest requests.CommentRequest
 	err := ctx.Bind(&commentRequest)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not decode comment data"))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, fmt.Sprint(err.Error()+"could not decode comment data"))
 	}
 	err = ctx.Validate(&commentRequest)
 	if err != nil {
 		log.Print(err)
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
 	}
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not parse comment ID"))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, fmt.Sprint(err.Error()+"could not parse comment ID"))
 	}
 	comment, err := c.service.UpdateComment(commentRequest.Body, id)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return echo.NewHTTPError(http.StatusNotFound, err)
+			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
 		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		}
 	}
-	return ctx.JSON(http.StatusOK, comment)
+	commentResponse := domain.Comment.DomainToResponse(comment)
+	return response.Response(ctx, http.StatusOK, commentResponse)
 }
 
 // DeleteComment	godoc
@@ -148,23 +157,25 @@ func (c CommentHandler) UpdateComment(ctx echo.Context) error {
 // @Description 	Delete Comment
 // @Tags			Comments Actions
 // @Param			id path int true "ID"
-// @Success 		200
-// @Failure			404 {object} error
+// @Success 		200 {object} response.Data
+// @Failure			400	{object} response.Error
+// @Failure			404 {object} response.Error
+// @Failure			500 {object} response.Error
 // @Security 		ApiKeyAuth
-// @Router			/comments/delete/{id} [delete]
+// @Router			/api/v1/comments/delete/{id} [delete]
 func (c CommentHandler) DeleteComment(ctx echo.Context) error {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not parse comment ID"))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, err.Error()+"could not parse comment ID")
 	}
 	err = c.service.DeleteComment(id)
 	if err != nil {
 		log.Print(err)
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return echo.NewHTTPError(http.StatusNotFound, err)
+			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
 		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		}
 	}
-	return ctx.NoContent(http.StatusOK)
+	return response.MessageResponse(ctx, http.StatusOK, "Comment Delete")
 }

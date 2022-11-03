@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,6 +10,7 @@ import (
 	"trainee/internal/app"
 	"trainee/internal/domain"
 	"trainee/internal/infra/http/requests"
+	"trainee/internal/infra/http/response"
 )
 
 type PostHandler struct {
@@ -29,22 +29,22 @@ func NewPostHandler(s app.PostService) PostHandler {
 // @Tags			Posts Actions
 // @Accept 			json
 // @Produce 		json
-// @Param			input body domain.Post true "comment info"
-// @Success 		201 {object} domain.Post
-// @Failure			400 {object} error
-// @Failure 		422 {object} error
-// @Failure 		500 {object} error
+// @Param			input body requests.PostRequest true "comment info"
+// @Success 		201 {object} response.PostResponse
+// @Failure			400 {object} response.Error
+// @Failure 		422 {object} response.Error
+// @Failure 		500 {object} response.Error
 // @Security        ApiKeyAuth
-// @Router			/posts/save [post]
+// @Router			/api/v1/posts/save [post]
 func (p PostHandler) SavePost(ctx echo.Context) error {
 	var postRequest requests.PostRequest
 	err := ctx.Bind(&postRequest)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not decode post data"))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, err.Error()+"could not decode post data")
 	}
 	err = ctx.Validate(&postRequest)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
 	}
 	user := ctx.Get("user").(*jwt.Token)
 	claims := user.Claims.(*app.JwtAccessClaim)
@@ -57,9 +57,10 @@ func (p PostHandler) SavePost(ctx echo.Context) error {
 	post, err = p.service.SavePost(post)
 	if err != nil {
 		log.Print(err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err)
+		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 	}
-	return ctx.JSON(http.StatusCreated, post)
+	postResponse := domain.Post.DomainToResponse(post)
+	return response.Response(ctx, http.StatusCreated, postResponse)
 }
 
 // GetPost  		godoc
@@ -68,25 +69,28 @@ func (p PostHandler) SavePost(ctx echo.Context) error {
 // @Tags			Posts Actions
 // @Produce 		json
 // @Param			id path int true "ID"
-// @Success 		200 {object} domain.Post
-// @Failure 		404 {object} error
+// @Success 		200 {object} response.PostResponse
+// @Failure 		400 {object} response.Error
+// @Failure 		404 {object} response.Error
+// @Failure 		500 {object} response.Error
 // @Security        ApiKeyAuth
-// @Router			/posts/post/{id} [get]
+// @Router			/api/v1/posts/post/{id} [get]
 func (p PostHandler) GetPost(ctx echo.Context) error {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not parse post ID"))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, err.Error()+"could not parse post ID")
 	}
 	post, err := p.service.GetPost(id)
 	if err != nil {
 		log.Print(err)
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return echo.NewHTTPError(http.StatusNotFound, err)
+			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
 		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		}
 	}
-	return ctx.JSON(http.StatusOK, post)
+	postResponse := domain.Post.DomainToResponse(post)
+	return response.Response(ctx, http.StatusOK, postResponse)
 }
 
 // UpdatePost  		godoc
@@ -95,24 +99,29 @@ func (p PostHandler) GetPost(ctx echo.Context) error {
 // @Tags			Posts Actions
 // @Accept 			json
 // @Produce 		json
-// @Param			input body domain.Post true "post info"
-// @Success 		200 {object} domain.Post
-// @Failure 		404 {object} error
+// @Param			id path int true "ID"
+// @Param			input body requests.PostRequest true "post info"
+// @Success 		200 {object} response.PostResponse
+// @Failure 		400 {object} response.Error
+// @Failure 		422 {object} response.Error
+// @Failure 		400 {object} response.Error
+// @Failure 		404 {object} response.Error
+// @Failure 		500 {object} response.Error
 // @Security        ApiKeyAuth
-// @Router			/posts/update [put]
+// @Router			/api/v1/posts/update/{id} [put]
 func (p PostHandler) UpdatePost(ctx echo.Context) error {
 	var postRequest requests.PostRequest
 	err := ctx.Bind(&postRequest)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "could not decode post data")
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "could not decode post data")
 	}
 	err = ctx.Validate(&postRequest)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnprocessableEntity, err)
+		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
 	}
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, errors.Wrap(err, "could not parse post ID"))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, err.Error()+"could not parse post ID")
 	}
 	user := ctx.Get("user").(*jwt.Token)
 	claims := user.Claims.(*app.JwtAccessClaim)
@@ -126,12 +135,13 @@ func (p PostHandler) UpdatePost(ctx echo.Context) error {
 	post, err = p.service.UpdatePost(post)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return echo.NewHTTPError(http.StatusNotFound, err)
+			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
 		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		}
 	}
-	return ctx.JSON(http.StatusOK, post)
+	postResponse := domain.Post.DomainToResponse(post)
+	return response.Response(ctx, http.StatusOK, postResponse)
 }
 
 // DeletePost  		godoc
@@ -140,22 +150,24 @@ func (p PostHandler) UpdatePost(ctx echo.Context) error {
 // @Tags			Posts Actions
 // @Produce 		json
 // @Param			id path int true "ID"
-// @Success 		200
-// @Failure 		404 {object} error
+// @Success 		200 {object} response.Data
+// @Failure 		400 {object} response.Error
+// @Failure 		404 {object} response.Error
+// @Failure 		500 {object} response.Error
 // @Security        ApiKeyAuth
-// @Router			/posts/delete/{id} [delete]
+// @Router			/api/v1/posts/delete/{id} [delete]
 func (p PostHandler) DeletePost(ctx echo.Context) error {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "could not parse post ID")
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "could not parse post ID")
 	}
 	err = p.service.DeletePost(id)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return echo.NewHTTPError(http.StatusNotFound, err)
+			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
 		} else {
-			return echo.NewHTTPError(http.StatusInternalServerError, err)
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		}
 	}
-	return ctx.NoContent(http.StatusOK)
+	return response.MessageResponse(ctx, http.StatusOK, "Post successfully delete")
 }

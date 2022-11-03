@@ -26,6 +26,7 @@ type Handlers struct {
 	handlers.CommentHandler
 	handlers.PostHandler
 	handlers.RegisterHandler
+	handlers.OauthHandler
 }
 
 func New(conf config.Configuration) Container {
@@ -35,6 +36,7 @@ func New(conf config.Configuration) Container {
 	userService := app.NewUserService(userRepository)
 	authService := app.NewAuthService(userService, conf)
 	registerController := handlers.NewRegisterHandler(userService, authService)
+	oauthController := handlers.NewOauthHandler(userService, authService)
 
 	postRepository := database.NewPostRepository(sess)
 	postService := app.NewPostService(postRepository)
@@ -55,6 +57,7 @@ func New(conf config.Configuration) Container {
 			commentHandler,
 			postHandler,
 			registerController,
+			oauthController,
 		},
 	}
 }
