@@ -44,12 +44,26 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/response.CommentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
@@ -77,16 +91,33 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Data"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/api/v1/comments/save": {
+        "/api/v1/comments/save/{post_id}": {
             "post": {
                 "security": [
                     {
@@ -106,6 +137,13 @@ const docTemplate = `{
                 "summary": "Save Comment",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "PostID",
+                        "name": "post_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "comment info",
                         "name": "input",
                         "in": "body",
@@ -124,20 +162,26 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/api/v1/comments/update": {
+        "/api/v1/comments/update/{id}": {
             "put": {
                 "security": [
                     {
@@ -157,6 +201,13 @@ const docTemplate = `{
                 "summary": "Update Comment",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "comment info",
                         "name": "input",
                         "in": "body",
@@ -170,16 +221,26 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Comment"
+                            "$ref": "#/definitions/response.CommentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
@@ -210,11 +271,28 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Data"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
@@ -247,12 +325,26 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/response.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
@@ -290,25 +382,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/response.PostResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "422": {
                         "description": "Unprocessable Entity",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         },
-        "/api/v1/posts/update": {
+        "/api/v1/posts/update/{id}": {
             "put": {
                 "security": [
                     {
@@ -328,6 +426,13 @@ const docTemplate = `{
                 "summary": "Update Post",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "post info",
                         "name": "input",
                         "in": "body",
@@ -341,12 +446,32 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/domain.Post"
+                            "$ref": "#/definitions/response.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
                         }
                     },
                     "404": {
                         "description": "Not Found",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
@@ -384,11 +509,15 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     },
                     "401": {
                         "description": "Unauthorized",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
@@ -422,99 +551,20 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/domain.User"
+                            "$ref": "#/definitions/response.UserResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {}
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
-        "domain.Comment": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "createdDate": {
-                    "type": "string"
-                },
-                "deletedDate": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "postID": {
-                    "type": "integer"
-                },
-                "updatedDate": {
-                    "type": "string"
-                }
-            }
-        },
-        "domain.Post": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "type": "string"
-                },
-                "createdDate": {
-                    "type": "string"
-                },
-                "deletedDate": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updatedDate": {
-                    "type": "string"
-                },
-                "userID": {
-                    "type": "integer"
-                }
-            }
-        },
-        "domain.User": {
-            "type": "object",
-            "properties": {
-                "createdDate": {
-                    "type": "string"
-                },
-                "deletedDate": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "updatedDate": {
-                    "type": "string"
-                }
-            }
-        },
         "requests.CommentRequest": {
             "type": "object",
             "required": [
@@ -589,19 +639,46 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "body": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "lorem ipsum"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "example@email.com"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 1
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Bob"
                 },
                 "post_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "response.Data": {
+            "type": "object",
+            "properties": {
+                "code": {
                     "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
                 }
             }
         },
@@ -615,6 +692,41 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "refreshToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.PostResponse": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "type": "string",
+                    "example": "Lorem ipsum"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Lorem ipsum"
+                },
+                "user_id": {
+                    "type": "integer",
+                    "example": 1
+                }
+            }
+        },
+        "response.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }

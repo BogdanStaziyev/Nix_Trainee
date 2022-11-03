@@ -31,7 +31,7 @@ func NewOauthHandler(u app.UserService, a app.AuthService) OauthHandler {
 	}
 }
 
-func (o OauthHandler) GetInfo(c echo.Context) error {
+func (o OauthHandler) GetInfo(ctx echo.Context) error {
 	googleConfig := config.LoadOAUTHConfiguration()
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
@@ -41,17 +41,17 @@ func (o OauthHandler) GetInfo(c echo.Context) error {
 	state := base64.URLEncoding.EncodeToString(b)
 	url := googleConfig.AuthCodeURL(state)
 	log.Println(url)
-	err = c.Redirect(http.StatusTemporaryRedirect, url)
+	err = ctx.Redirect(http.StatusTemporaryRedirect, url)
 	if err != nil {
 		log.Println(err)
 	}
 	return err
 }
 
-func (o OauthHandler) CallBackRegister(c echo.Context) error {
+func (o OauthHandler) CallBackRegister(ctx echo.Context) error {
 	cfg := config.LoadOAUTHConfiguration()
 
-	token, err := cfg.Exchange(context.Background(), c.FormValue("code"))
+	token, err := cfg.Exchange(context.Background(), ctx.FormValue("code"))
 	if err != nil {
 		return fmt.Errorf("code exchange wrong: %s", err.Error())
 	}
@@ -70,28 +70,24 @@ func (o OauthHandler) CallBackRegister(c echo.Context) error {
 	user, err := o.as.Register(userFromRegister)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "invalid credentials user exist") {
-			userDB, err := o.us.FindByEmail(userFromRegister.Email)
+			user, err = o.us.FindByEmail(userFromRegister.Email)
 			log.Println(userFromRegister)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, "user not exist")
 			}
-			if userDB.ID == 0 || (bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(userFromRegister.Password)) != nil) {
+			if user.ID == 0 || (bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(userFromRegister.Password)) != nil) {
 				return echo.NewHTTPError(http.StatusUnauthorized, "invalid credentials")
 			}
-			accessToken, exp, err := o.as.CreateAccessToken(userDB)
-			if err != nil {
-				return err
-			}
-			refreshToken, err := o.as.CreateRefreshToken(userDB)
-			if err != nil {
-				return err
-			}
-			res := response.NewLoginResponse(accessToken, refreshToken, exp)
-
-			return echo.NewHTTPError(http.StatusOK, res)
 		}
-		log.Printf("Google Handler: %s", err)
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusCreated, user)
+	accessToken, exp, err := o.as.CreateAccessToken(user)
+	if err != nil {
+		return err
+	}
+	refreshToken, err := o.as.CreateRefreshToken(user)
+	if err != nil {
+		return err
+	}
+	res := response.NewLoginResponse(accessToken, refreshToken, exp)
+	return response.Response(ctx, http.StatusOK, res)
 }

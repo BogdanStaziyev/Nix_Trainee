@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"time"
+	"trainee/internal/infra/http/response"
+)
 
 type User struct {
 	ID          int64
@@ -10,4 +13,12 @@ type User struct {
 	CreatedDate time.Time
 	UpdatedDate time.Time
 	DeletedDate *time.Time
+}
+
+func (u User) DomainToResponse() response.UserResponse {
+	return response.UserResponse{
+		ID:    u.ID,
+		Email: u.Email,
+		Name:  u.Name,
+	}
 }

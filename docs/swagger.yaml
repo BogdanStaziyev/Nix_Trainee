@@ -1,58 +1,5 @@
 basePath: /
 definitions:
-  domain.Comment:
-    properties:
-      body:
-        type: string
-      createdDate:
-        type: string
-      deletedDate:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      postID:
-        type: integer
-      updatedDate:
-        type: string
-    type: object
-  domain.Post:
-    properties:
-      body:
-        type: string
-      createdDate:
-        type: string
-      deletedDate:
-        type: string
-      id:
-        type: integer
-      title:
-        type: string
-      updatedDate:
-        type: string
-      userID:
-        type: integer
-    type: object
-  domain.User:
-    properties:
-      createdDate:
-        type: string
-      deletedDate:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      password:
-        type: string
-      updatedDate:
-        type: string
-    type: object
   requests.CommentRequest:
     properties:
       body:
@@ -106,15 +53,34 @@ definitions:
   response.CommentResponse:
     properties:
       body:
+        example: lorem ipsum
         type: string
       email:
+        example: example@email.com
         type: string
       id:
+        example: 1
         type: integer
       name:
+        example: Bob
         type: string
       post_id:
+        example: 1
         type: integer
+    type: object
+  response.Data:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  response.Error:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
     type: object
   response.LoginResponse:
     properties:
@@ -123,6 +89,30 @@ definitions:
       exp:
         type: integer
       refreshToken:
+        type: string
+    type: object
+  response.PostResponse:
+    properties:
+      body:
+        example: Lorem ipsum
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Lorem ipsum
+        type: string
+      user_id:
+        example: 1
+        type: integer
+    type: object
+  response.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
         type: string
     type: object
 host: localhost:8000
@@ -147,10 +137,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Comment'
+            $ref: '#/definitions/response.CommentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Error'
         "404":
           description: Not Found
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Error'
       security:
       - ApiKeyAuth: []
       summary: Get Comment
@@ -168,20 +167,36 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/response.Data'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Error'
         "404":
           description: Not Found
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Error'
       security:
       - ApiKeyAuth: []
       summary: Delete Comment
       tags:
       - Comments Actions
-  /api/v1/comments/save:
+  /api/v1/comments/save/{post_id}:
     post:
       consumes:
       - application/json
       description: Save Comment
       parameters:
+      - description: PostID
+        in: path
+        name: post_id
+        required: true
+        type: integer
       - description: comment info
         in: body
         name: input
@@ -197,24 +212,32 @@ paths:
             $ref: '#/definitions/response.CommentResponse'
         "400":
           description: Bad Request
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
         "422":
           description: Unprocessable Entity
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
         "500":
           description: Internal Server Error
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
       security:
       - ApiKeyAuth: []
       summary: Save Comment
       tags:
       - Comments Actions
-  /api/v1/comments/update:
+  /api/v1/comments/update/{id}:
     put:
       consumes:
       - application/json
       description: Update Comment
       parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       - description: comment info
         in: body
         name: input
@@ -227,13 +250,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Comment'
+            $ref: '#/definitions/response.CommentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Error'
         "404":
           description: Not Found
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
         "422":
           description: Unprocessable Entity
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
       security:
       - ApiKeyAuth: []
       summary: Update Comment
@@ -253,9 +282,20 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/response.Data'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Error'
         "404":
           description: Not Found
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Error'
       security:
       - ApiKeyAuth: []
       summary: Delete Post
@@ -276,10 +316,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Post'
+            $ref: '#/definitions/response.PostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Error'
         "404":
           description: Not Found
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Error'
       security:
       - ApiKeyAuth: []
       summary: Get Post
@@ -303,27 +352,35 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/domain.Post'
+            $ref: '#/definitions/response.PostResponse'
         "400":
           description: Bad Request
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
         "422":
           description: Unprocessable Entity
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
         "500":
           description: Internal Server Error
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
       security:
       - ApiKeyAuth: []
       summary: Save Post
       tags:
       - Posts Actions
-  /api/v1/posts/update:
+  /api/v1/posts/update/{id}:
     put:
       consumes:
       - application/json
       description: Update Post
       parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
       - description: post info
         in: body
         name: input
@@ -336,10 +393,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.Post'
+            $ref: '#/definitions/response.PostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Error'
         "404":
           description: Not Found
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Error'
       security:
       - ApiKeyAuth: []
       summary: Update Post
@@ -366,10 +436,12 @@ paths:
             $ref: '#/definitions/response.LoginResponse'
         "400":
           description: Bad Request
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
         "401":
           description: Unauthorized
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
       summary: LoginAuth
       tags:
       - Auth Actions
@@ -392,10 +464,11 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/domain.User'
+            $ref: '#/definitions/response.UserResponse'
         "400":
           description: Bad Request
-          schema: {}
+          schema:
+            $ref: '#/definitions/response.Error'
       summary: Register
       tags:
       - Auth Actions

@@ -32,13 +32,14 @@ func NewCommentHandler(s app.CommentService, u app.UserService) CommentHandler {
 // @Tags			Comments Actions
 // @Accept 			json
 // @Produce 		json
+// @Param			post_id path int true "PostID"
 // @Param			input body requests.CommentRequest true "comment info"
 // @Success 		201 {object} response.CommentResponse
-// @Failure			400 {object} error
-// @Failure 		422 {object} error
-// @Failure 		500 {object} error
+// @Failure			400 {object} response.Error
+// @Failure 		422 {object} response.Error
+// @Failure 		500 {object} response.Error
 // @Security        ApiKeyAuth
-// @Router			/api/v1/comments/save [post]
+// @Router			/api/v1/comments/save/{post_id} [post]
 func (c CommentHandler) SaveComment(ctx echo.Context) error {
 	var commentRequest requests.CommentRequest
 	err := ctx.Bind(&commentRequest)
@@ -86,8 +87,10 @@ func (c CommentHandler) SaveComment(ctx echo.Context) error {
 // @Tags			Comments Actions
 // @Produce 		json
 // @Param			id path int true "ID"
-// @Success 		200 {object} domain.Comment
-// @Failure			404 {object} error
+// @Success 		200 {object} response.CommentResponse
+// @Failure			400 {object} response.Error
+// @Failure			404 {object} response.Error
+// @Failure			500 {object} response.Error
 // @Security 		ApiKeyAuth
 // @Router			/api/v1/comments/comment/{id} [get]
 func (c CommentHandler) GetComment(ctx echo.Context) error {
@@ -105,7 +108,7 @@ func (c CommentHandler) GetComment(ctx echo.Context) error {
 		}
 	}
 	commentResponse := domain.Comment.DomainToResponse(comment)
-	return ctx.JSON(http.StatusOK, commentResponse)
+	return response.Response(ctx, http.StatusOK, commentResponse)
 }
 
 // UpdateComment 	godoc
@@ -114,12 +117,14 @@ func (c CommentHandler) GetComment(ctx echo.Context) error {
 // @Tags			Comments Actions
 // @Accept 			json
 // @Produce 		json
+// @Param			id path int true "ID"
 // @Param			input body requests.CommentRequest true "comment info"
-// @Success 		200 {object} domain.Comment
-// @Failure			422 {object} error
-// @Failure			404 {object} error
+// @Success 		200 {object} response.CommentResponse
+// @Failure			400 {object} response.Error
+// @Failure			422 {object} response.Error
+// @Failure			404 {object} response.Error
 // @Security 		ApiKeyAuth
-// @Router			/api/v1/comments/update [put]
+// @Router			/api/v1/comments/update/{id} [put]
 func (c CommentHandler) UpdateComment(ctx echo.Context) error {
 	var commentRequest requests.CommentRequest
 	err := ctx.Bind(&commentRequest)
@@ -152,8 +157,10 @@ func (c CommentHandler) UpdateComment(ctx echo.Context) error {
 // @Description 	Delete Comment
 // @Tags			Comments Actions
 // @Param			id path int true "ID"
-// @Success 		200
-// @Failure			404 {object} error
+// @Success 		200 {object} response.Data
+// @Failure			400	{object} response.Error
+// @Failure			404 {object} response.Error
+// @Failure			500 {object} response.Error
 // @Security 		ApiKeyAuth
 // @Router			/api/v1/comments/delete/{id} [delete]
 func (c CommentHandler) DeleteComment(ctx echo.Context) error {
