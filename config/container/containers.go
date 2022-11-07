@@ -3,6 +3,7 @@ package container
 import (
 	"github.com/upper/db/v4"
 	"github.com/upper/db/v4/adapter/postgresql"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"trainee/config"
 	"trainee/internal/app"
@@ -33,7 +34,8 @@ func New(conf config.Configuration) Container {
 	sess := getDbSess(conf)
 
 	userRepository := database.NewUSerRepo(sess)
-	userService := app.NewUserService(userRepository)
+	passwordGenerator := app.NewGeneratePasswordHash(bcrypt.DefaultCost)
+	userService := app.NewUserService(userRepository, passwordGenerator)
 	authService := app.NewAuthService(userService, conf)
 	registerController := handlers.NewRegisterHandler(userService, authService)
 	oauthController := handlers.NewOauthHandler(userService, authService)

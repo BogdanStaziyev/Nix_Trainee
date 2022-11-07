@@ -1,12 +1,12 @@
 package app
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"trainee/internal/domain"
 	"trainee/internal/infra/database"
 )
 
+//go:generate mockery --dir . --name UserService --output ./mocks
 type UserService interface {
 	Save(user domain.User) (domain.User, error)
 	FindByEmail(email string) (domain.User, error)
@@ -15,19 +15,21 @@ type UserService interface {
 }
 
 type userService struct {
-	userRepo database.UserRepo
+	userRepo    database.UserRepo
+	passwordGen Generator
 }
 
-func NewUserService(ur database.UserRepo) UserService {
+func NewUserService(ur database.UserRepo, gs Generator) UserService {
 	return userService{
-		userRepo: ur,
+		userRepo:    ur,
+		passwordGen: gs,
 	}
 }
 
 func (u userService) Save(user domain.User) (domain.User, error) {
 	var err error
 
-	user.Password, err = u.generatePasswordHash(user.Password)
+	user.Password, err = u.passwordGen.GeneratePasswordHash(user.Password)
 	if err != nil {
 		log.Printf("UserService: %s", err)
 		return domain.User{}, err
@@ -65,9 +67,4 @@ func (u userService) Delete(id int64) error {
 		return err
 	}
 	return nil
-}
-
-func (u userService) generatePasswordHash(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	return string(bytes), err
 }

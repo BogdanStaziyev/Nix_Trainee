@@ -18,6 +18,7 @@ type user struct {
 	DeletedDate *time.Time `db:"deleted_date,omitempty"`
 }
 
+//go:generate mockery --dir . --name UserRepo --output ./mock
 type UserRepo interface {
 	Save(user domain.User) (domain.User, error)
 	FindByEmail(email string) (domain.User, error)
