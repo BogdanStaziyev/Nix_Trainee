@@ -46,15 +46,8 @@ func (p PostHandler) SavePost(ctx echo.Context) error {
 	if err != nil {
 		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
 	}
-	user := ctx.Get("user").(*jwt.Token)
-	claims := user.Claims.(*app.JwtAccessClaim)
-	id := claims.ID
-	post := domain.Post{
-		Title:  postRequest.Title,
-		Body:   postRequest.Body,
-		UserID: id,
-	}
-	post, err = p.service.SavePost(post)
+	token := ctx.Get("user").(*jwt.Token)
+	post, err := p.service.SavePost(postRequest, token)
 	if err != nil {
 		log.Print(err)
 		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
@@ -119,20 +112,12 @@ func (p PostHandler) UpdatePost(ctx echo.Context) error {
 	if err != nil {
 		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
 	}
-	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
+	postID, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
 		return response.ErrorResponse(ctx, http.StatusBadRequest, err.Error()+"could not parse post ID")
 	}
-	user := ctx.Get("user").(*jwt.Token)
-	claims := user.Claims.(*app.JwtAccessClaim)
-	userID := claims.ID
-	post := domain.Post{
-		Title:  postRequest.Title,
-		Body:   postRequest.Body,
-		UserID: userID,
-		ID:     id,
-	}
-	post, err = p.service.UpdatePost(post)
+	token := ctx.Get("user").(*jwt.Token)
+	post, err := p.service.UpdatePost(postRequest, postID, token)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
 			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())

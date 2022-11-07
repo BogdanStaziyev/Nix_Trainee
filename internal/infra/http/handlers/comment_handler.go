@@ -15,14 +15,12 @@ import (
 )
 
 type CommentHandler struct {
-	service    app.CommentService
-	usrService app.UserService
+	service app.CommentService
 }
 
-func NewCommentHandler(s app.CommentService, u app.UserService) CommentHandler {
+func NewCommentHandler(s app.CommentService) CommentHandler {
 	return CommentHandler{
-		service:    s,
-		usrService: u,
+		service: s,
 	}
 }
 
@@ -55,27 +53,14 @@ func (c CommentHandler) SaveComment(ctx echo.Context) error {
 	if err != nil {
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "could not parse comment ID")
 	}
-	jwtUser := ctx.Get("user").(*jwt.Token)
-	claims := jwtUser.Claims.(*app.JwtAccessClaim)
-	user, err := c.usrService.FindByID(claims.ID)
+	token := ctx.Get("user").(*jwt.Token)
+	comment, err := c.service.SaveComment(commentRequest, postID, token)
 	if err != nil {
-		log.Printf("SaveComment error, %s", err)
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
 			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
 		} else {
 			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 		}
-	}
-	comment := domain.Comment{
-		PostID: postID,
-		Name:   user.Name,
-		Email:  user.Email,
-		Body:   commentRequest.Body,
-	}
-	comment, err = c.service.SaveComment(comment)
-	if err != nil {
-		log.Print(err)
-		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 	}
 	commentResponse := domain.Comment.DomainToResponse(comment)
 	return response.Response(ctx, http.StatusCreated, commentResponse)
@@ -140,7 +125,7 @@ func (c CommentHandler) UpdateComment(ctx echo.Context) error {
 	if err != nil {
 		return response.ErrorResponse(ctx, http.StatusBadRequest, fmt.Sprint(err.Error()+"could not parse comment ID"))
 	}
-	comment, err := c.service.UpdateComment(commentRequest.Body, id)
+	comment, err := c.service.UpdateComment(commentRequest, id)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
 			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())

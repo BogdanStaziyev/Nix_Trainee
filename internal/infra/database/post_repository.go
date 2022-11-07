@@ -57,7 +57,7 @@ func (r postsRepository) GetPost(id int64) (domain.Post, error) {
 		"deleted_date": nil,
 	}).One(&post)
 	if err != nil {
-		return domain.Post{}, fmt.Errorf("PostRepository GetPost: %w", err)
+		return domain.Post{}, fmt.Errorf("postRepository GetPost: %w", err)
 	}
 	return r.mapPostDbModelToDomain(post), nil
 }

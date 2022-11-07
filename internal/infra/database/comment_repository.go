@@ -5,6 +5,7 @@ import (
 	"github.com/upper/db/v4"
 	"time"
 	"trainee/internal/domain"
+	"trainee/internal/infra/http/requests"
 )
 
 const CommentTable = "commentses"
@@ -24,7 +25,7 @@ type comments struct {
 type CommentRepo interface {
 	SaveComment(comment domain.Comment) (domain.Comment, error)
 	GetComment(id int64) (domain.Comment, error)
-	UpdateComment(comment string, id int64) (domain.Comment, error)
+	UpdateComment(commentRequest requests.CommentRequest, id int64) (domain.Comment, error)
 	DeleteComment(id int64) error
 	GetCommentsByPostID(postID int64) ([]domain.Comment, error)
 }
@@ -63,17 +64,25 @@ func (r commentsRepository) GetComment(id int64) (domain.Comment, error) {
 	return r.mapCommentDbModelToDomain(comment), nil
 }
 
-func (r commentsRepository) UpdateComment(comment string, id int64) (domain.Comment, error) {
-	var updateComment comments
-	err := r.coll.Find(db.Cond{"id": id}).One(&updateComment)
+func (r commentsRepository) UpdateComment(commentRequest requests.CommentRequest, id int64) (domain.Comment, error) {
+	err := r.coll.Find(db.Cond{
+		"id":           id,
+		"deleted_date": nil,
+	}).Update(map[string]interface{}{
+		"updated_date": time.Now(),
+		"body":         commentRequest.Body,
+	})
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("CommentRepository UpdateComment: %w", err)
 	}
-	updateComment.Body = comment
-	return r.mapCommentDbModelToDomain(updateComment), nil
+	return r.GetComment(id)
 }
 
 func (r commentsRepository) DeleteComment(id int64) error {
+	_, err := r.GetComment(id)
+	if err != nil {
+		return err
+	}
 	return r.coll.Find(db.Cond{
 		"id":           id,
 		"deleted_date": nil,

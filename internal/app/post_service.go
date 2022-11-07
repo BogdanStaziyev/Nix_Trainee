@@ -1,16 +1,18 @@
 package app
 
 import (
+	"github.com/golang-jwt/jwt"
 	"log"
 	"trainee/internal/domain"
 	"trainee/internal/infra/database"
+	"trainee/internal/infra/http/requests"
 )
 
 //go:generate mockery --dir . --name PostService --output ./mocks
 type PostService interface {
-	SavePost(post domain.Post) (domain.Post, error)
+	SavePost(postRequest requests.PostRequest, token *jwt.Token) (domain.Post, error)
 	GetPost(id int64) (domain.Post, error)
-	UpdatePost(post domain.Post) (domain.Post, error)
+	UpdatePost(postRequest requests.PostRequest, postID int64, token *jwt.Token) (domain.Post, error)
 	DeletePost(id int64) error
 	GetPostsByUser(userID int64) ([]domain.Post, error)
 }
@@ -25,26 +27,41 @@ func NewPostService(repo database.PostRepo) PostService {
 	}
 }
 
-func (s postService) SavePost(post domain.Post) (domain.Post, error) {
-	return s.repo.SavePost(post)
+func (s postService) SavePost(postRequest requests.PostRequest, token *jwt.Token) (domain.Post, error) {
+	claim := token.Claims.(*JwtAccessClaim)
+	userID := claim.ID
+	domainPost := domain.Post{
+		Title:  postRequest.Title,
+		Body:   postRequest.Body,
+		UserID: userID,
+	}
+	post, err := s.repo.SavePost(domainPost)
+	if err != nil {
+		log.Println(err)
+		return domain.Post{}, err
+	}
+	return post, err
 }
 
 func (s postService) GetPost(id int64) (domain.Post, error) {
-	post, err := s.repo.GetPost(id)
-	if err != nil {
-		return domain.Post{}, err
-	}
-	log.Println(post)
-	//todo fix domain comment
-	//comment, err := s.service.GetCommentsByPostID(id)
-	//if err == nil {
-	//	post.Comment = comment
-	//}
-	return post, nil
+	return s.repo.GetPost(id)
 }
 
-func (s postService) UpdatePost(post domain.Post) (domain.Post, error) {
-	return s.repo.UpdatePost(post)
+func (s postService) UpdatePost(postRequest requests.PostRequest, postID int64, token *jwt.Token) (domain.Post, error) {
+	claims := token.Claims.(*JwtAccessClaim)
+	userID := claims.ID
+	domainPost := domain.Post{
+		Title:  postRequest.Title,
+		Body:   postRequest.Body,
+		UserID: userID,
+		ID:     postID,
+	}
+	post, err := s.repo.UpdatePost(domainPost)
+	if err != nil {
+		log.Println(err)
+		return domain.Post{}, err
+	}
+	return post, nil
 }
 
 func (s postService) DeletePost(id int64) error {

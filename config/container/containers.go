@@ -45,8 +45,8 @@ func New(conf config.Configuration) Container {
 	postHandler := handlers.NewPostHandler(postService)
 
 	commentRepository := database.NewCommentRepository(sess)
-	commentService := app.NewCommentService(commentRepository)
-	commentHandler := handlers.NewCommentHandler(commentService, userService)
+	commentService := app.NewCommentService(commentRepository, userService, postService)
+	commentHandler := handlers.NewCommentHandler(commentService)
 
 	return Container{
 		Services: Services{
