@@ -1,8 +1,25 @@
 package domain
 
+import (
+	"time"
+	"trainee/internal/infra/http/response"
+)
+
 type Post struct {
-	UserId int    `json:"user_id" example:"1" validate:"required"`
-	Id     int    `json:"id,omitempty" example:"1"`
-	Title  string `json:"title" example:"Lorem ipsum" validate:"required"`
-	Body   string `json:"body" example:"Lorem ipsum" validate:"required"`
+	UserID      int64
+	ID          int64
+	Title       string
+	Body        string
+	CreatedDate time.Time
+	UpdatedDate time.Time
+	DeletedDate *time.Time
+}
+
+func (p Post) DomainToResponse() response.PostResponse {
+	return response.PostResponse{
+		ID:     p.ID,
+		UserID: p.UserID,
+		Title:  p.Title,
+		Body:   p.Body,
+	}
 }
