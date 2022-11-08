@@ -3,6 +3,7 @@ package container
 import (
 	"github.com/upper/db/v4"
 	"github.com/upper/db/v4/adapter/postgresql"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"trainee/config"
 	"trainee/internal/app"
@@ -18,32 +19,47 @@ type Container struct {
 type Services struct {
 	app.CommentService
 	app.PostService
+	app.UserService
+	app.AuthService
 }
 
 type Handlers struct {
 	handlers.CommentHandler
 	handlers.PostHandler
+	handlers.RegisterHandler
+	handlers.OauthHandler
 }
 
 func New(conf config.Configuration) Container {
 	sess := getDbSess(conf)
 
-	commentRepository := database.NewCommentRepository(sess)
-	commentService := app.NewCommentService(commentRepository)
-	commentHandler := handlers.NewCommentHandler(commentService)
+	userRepository := database.NewUSerRepo(sess)
+	passwordGenerator := app.NewGeneratePasswordHash(bcrypt.DefaultCost)
+	userService := app.NewUserService(userRepository, passwordGenerator)
+	authService := app.NewAuthService(userService, conf)
+	registerController := handlers.NewRegisterHandler(userService, authService)
+	oauthController := handlers.NewOauthHandler(userService, authService)
 
 	postRepository := database.NewPostRepository(sess)
 	postService := app.NewPostService(postRepository)
 	postHandler := handlers.NewPostHandler(postService)
 
+	commentRepository := database.NewCommentRepository(sess)
+	commentService := app.NewCommentService(commentRepository, userService, postService)
+	commentHandler := handlers.NewCommentHandler(commentService)
+
 	return Container{
 		Services: Services{
 			commentService,
 			postService,
+			userService,
+			authService,
 		},
 		Handlers: Handlers{
 			commentHandler,
 			postHandler,
+			registerController,
+			oauthController,
 		},
 	}
 }

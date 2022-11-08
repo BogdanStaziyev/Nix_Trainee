@@ -17,9 +17,5 @@
 # Go workspace file
 go.work
 
-# Custom ignores
-.env
-
 .idea
-cmd/server/hoofs
 .vscode
