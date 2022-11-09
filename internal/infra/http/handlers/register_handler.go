@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
-	"golang.org/x/crypto/bcrypt"
-	"log"
 	"net/http"
+	"strings"
 	"trainee/internal/app"
 	"trainee/internal/domain"
 	"trainee/internal/infra/http/requests"
@@ -37,18 +37,17 @@ func NewRegisterHandler(u app.UserService, a app.AuthService) RegisterHandler {
 func (r RegisterHandler) Register(ctx echo.Context) error {
 	var registerUser requests.RegisterAuth
 	if err := ctx.Bind(&registerUser); err != nil {
-		return err
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not decode user data")
 	}
 	if err := ctx.Validate(&registerUser); err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, "Empty or not valid")
+		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, "Could not validate user data")
 	}
 
 	userFromRegister := registerUser.RegisterToUser()
 
 	user, err := r.as.Register(userFromRegister)
 	if err != nil {
-		log.Printf("Register Handler: %s", err)
-		return response.ErrorResponse(ctx, http.StatusBadRequest, err.Error())
+		return response.ErrorResponse(ctx, http.StatusBadRequest, fmt.Sprintf("Could not save new user: %s", err))
 	}
 	userResponse := domain.User.DomainToResponse(user)
 	return response.Response(ctx, http.StatusCreated, userResponse)
@@ -64,31 +63,28 @@ func (r RegisterHandler) Register(ctx echo.Context) error {
 // @Success 		201 {object} response.LoginResponse
 // @Failure			400 {object} response.Error
 // @Failure			401 {object} response.Error
+// @Failure			500 {object} response.Error
 // @Router			/login [post]
 func (r RegisterHandler) Login(ctx echo.Context) error {
 	var authUser requests.LoginAuth
 	if err := ctx.Bind(&authUser); err != nil {
-		return err
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not decode user data")
 	}
 	if err := ctx.Validate(&authUser); err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, "files not empty")
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not validate user data")
 	}
-	user, err := r.us.FindByEmail(authUser.Email)
+	user, refreshToken, err := r.as.Login(authUser)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, "user not exist")
-	}
-	if user.ID == 0 || (bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(authUser.Password)) != nil) {
-		return response.ErrorResponse(ctx, http.StatusUnauthorized, "invalid credentials")
+		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
+			return response.ErrorResponse(ctx, http.StatusNotFound, fmt.Sprintf("Could not login, user not exists: %s", err))
+		} else {
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could login user: %s", err))
+		}
 	}
 	accessToken, exp, err := r.as.CreateAccessToken(user)
 	if err != nil {
-		return err
-	}
-	refreshToken, err := r.as.CreateRefreshToken(user)
-	if err != nil {
-		return err
+		return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Unauthorized Could not create access token: %s", err))
 	}
 	res := response.NewLoginResponse(accessToken, refreshToken, exp)
-
 	return response.Response(ctx, http.StatusOK, res)
 }

@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
-	"log"
 	"trainee/internal/domain"
 	"trainee/internal/infra/database"
 	"trainee/internal/infra/http/requests"
@@ -36,13 +35,11 @@ func (s commentService) SaveComment(commentRequest requests.CommentRequest, post
 	claims := token.Claims.(*JwtAccessClaim)
 	_, err := s.ps.GetPost(postID)
 	if err != nil {
-		log.Printf("SaveComment error, %s", err)
-		return domain.Comment{}, fmt.Errorf("save comment error: %w", err)
+		return domain.Comment{}, fmt.Errorf("service error save comment: %w", err)
 	}
 	user, err := s.us.FindByID(claims.ID)
 	if err != nil {
-		log.Printf("SaveComment error, %s", err)
-		return domain.Comment{}, err
+		return domain.Comment{}, fmt.Errorf("service error save comment: %w", err)
 	}
 	domainComment := domain.Comment{
 		PostID: postID,
@@ -50,21 +47,50 @@ func (s commentService) SaveComment(commentRequest requests.CommentRequest, post
 		Email:  user.Email,
 		Body:   commentRequest.Body,
 	}
-	return s.repo.SaveComment(domainComment)
+	comment, err := s.repo.SaveComment(domainComment)
+	if err != nil {
+		return domain.Comment{}, fmt.Errorf("service error save comment: %w", err)
+	}
+	return comment, nil
 }
 
 func (s commentService) GetComment(id int64) (domain.Comment, error) {
-	return s.repo.GetComment(id)
+	comment, err := s.repo.GetComment(id)
+	if err != nil {
+		return domain.Comment{}, fmt.Errorf("service error get comment: %w", err)
+	}
+	return comment, nil
 }
 
 func (s commentService) UpdateComment(commentRequest requests.CommentRequest, id int64) (domain.Comment, error) {
-	return s.repo.UpdateComment(commentRequest, id)
+	comment, err := s.repo.GetComment(id)
+	if err != nil {
+		return domain.Comment{}, fmt.Errorf("service error update comment: %w", err)
+	}
+	comment.Body = commentRequest.Body
+	comment, err = s.repo.UpdateComment(comment)
+	if err != nil {
+		return domain.Comment{}, fmt.Errorf("service error update comment: %w", err)
+	}
+	return comment, nil
 }
 
 func (s commentService) DeleteComment(id int64) error {
-	return s.repo.DeleteComment(id)
+	_, err := s.repo.GetComment(id)
+	if err != nil {
+		return fmt.Errorf("service error delete comment: %w", err)
+	}
+	err = s.repo.DeleteComment(id)
+	if err != nil {
+		return fmt.Errorf("service error delete comment: %w", err)
+	}
+	return nil
 }
 
 func (s commentService) GetCommentsByPostID(postID int64) ([]domain.Comment, error) {
-	return s.repo.GetCommentsByPostID(postID)
+	comments, err := s.repo.GetCommentsByPostID(postID)
+	if err != nil {
+		return []domain.Comment{}, fmt.Errorf("service error get all comments by postID: %w", err)
+	}
+	return comments, nil
 }
