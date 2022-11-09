@@ -2,13 +2,14 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/upper/db/v4"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	"time"
 	"trainee/config"
 	"trainee/internal/domain"
+	"trainee/internal/infra/http/requests"
 )
 
 const (
@@ -18,7 +19,7 @@ const (
 
 type AuthService interface {
 	Register(user domain.User) (domain.User, error)
-	Login(user domain.User) (domain.User, string, error)
+	Login(user requests.LoginAuth) (domain.User, string, error)
 	CreateRefreshToken(user domain.User) (string, error)
 	CreateAccessToken(user domain.User) (string, int64, error)
 }
@@ -38,39 +39,34 @@ func NewAuthService(us UserService, cf config.Configuration) AuthService {
 func (a authService) Register(user domain.User) (domain.User, error) {
 	_, err := a.userService.FindByEmail(user.Email)
 	if err == nil {
-		log.Println("invalid credentials user exist")
-		return domain.User{}, errors.New("invalid credentials user exist")
-		//todo wraper
+		return domain.User{}, fmt.Errorf("auth service error register invalid credentials user exist: %w", err)
 	} else if !errors.Is(err, db.ErrNoMoreRows) {
-		//todo wraper
-		log.Println(err)
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("auth service error register: %w", err)
 	}
 	user, err = a.userService.Save(user)
 	if err != nil {
-		//todo wraper
-		log.Println(err)
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("auth service error register save user: %w", err)
 	}
 	return user, nil
 }
 
-func (a authService) Login(user domain.User) (domain.User, string, error) {
+func (a authService) Login(user requests.LoginAuth) (domain.User, string, error) {
 	u, err := a.userService.FindByEmail(user.Email)
 	if err != nil {
 		if errors.Is(err, db.ErrNoMoreRows) {
-			//todo wraper
-			log.Println(err)
+			return domain.User{}, "", fmt.Errorf("auth service error login, invalid credentials user not exist: %w", err)
 		}
-		log.Println(err)
-		return domain.User{}, "", err
+		return domain.User{}, "", fmt.Errorf("auth service error login user invalid email or password: %w", err)
 	}
 	valid := a.checkPasswordHash(user.Password, u.Password)
 	if !valid {
-		return domain.User{}, "", err
+		return domain.User{}, "", fmt.Errorf("auth service error login user invalid email or password: %w", err)
 	}
 	token, err := a.CreateRefreshToken(u)
-	return u, token, err
+	if err != nil {
+		return domain.User{}, "", fmt.Errorf("auth service error login: %w", err)
+	}
+	return u, token, nil
 }
 
 func (a authService) CreateRefreshToken(user domain.User) (string, error) {
@@ -84,9 +80,9 @@ func (a authService) CreateRefreshToken(user domain.User) (string, error) {
 
 	token, err := refreshToken.SignedString([]byte(a.config.RefreshSecret))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("auth service error create refresh token: %w", err)
 	}
-	return token, err
+	return token, nil
 }
 
 func (a authService) CreateAccessToken(user domain.User) (string, int64, error) {
@@ -101,7 +97,7 @@ func (a authService) CreateAccessToken(user domain.User) (string, int64, error) 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsAccess)
 	t, err := token.SignedString([]byte(a.config.AccessSecret))
 	if err != nil {
-		return "", 0, err
+		return "", 0, fmt.Errorf("auth service error create access token: %w", err)
 	}
 	return t, exp, err
 }

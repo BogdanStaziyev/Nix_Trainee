@@ -44,7 +44,7 @@ func (r postsRepository) SavePost(post domain.Post) (domain.Post, error) {
 	postDB.UpdatedDate = time.Now()
 	err := r.coll.InsertReturning(&postDB)
 	if err != nil {
-		return domain.Post{}, fmt.Errorf("PostRepository Create: %w", err)
+		return domain.Post{}, fmt.Errorf("post repository save post: %w", err)
 	}
 	return r.mapPostDbModelToDomain(postDB), nil
 }
@@ -57,7 +57,7 @@ func (r postsRepository) GetPost(id int64) (domain.Post, error) {
 		"deleted_date": nil,
 	}).One(&post)
 	if err != nil {
-		return domain.Post{}, fmt.Errorf("postRepository GetPost: %w", err)
+		return domain.Post{}, fmt.Errorf("post repository get post: %w", err)
 	}
 	return r.mapPostDbModelToDomain(post), nil
 }
@@ -66,24 +66,23 @@ func (r postsRepository) UpdatePost(post domain.Post) (domain.Post, error) {
 	updatePost := r.mapPostDBModel(post)
 	updatePost.UpdatedDate = time.Now()
 	err := r.coll.Find(db.Cond{
-		"id":           updatePost.ID,
-		"deleted_date": nil,
+		"id": updatePost.ID,
 	}).Update(&updatePost)
 	if err != nil {
-		return domain.Post{}, fmt.Errorf("PostRepository UpdatePost: %w", err)
+		return domain.Post{}, fmt.Errorf("post repository update post: %w", err)
 	}
-	err = r.coll.Find(db.Cond{"id": updatePost.ID}).One(&updatePost)
-	if err != nil {
-		return domain.Post{}, err
-	}
-	return r.mapPostDbModelToDomain(updatePost), nil
+	return r.mapPostDbModelToDomain(updatePost), err
 }
 
 func (r postsRepository) DeletePost(id int64) error {
-	return r.coll.Find(db.Cond{
+	err := r.coll.Find(db.Cond{
 		"id":           id,
 		"deleted_date": nil,
 	}).Update(map[string]interface{}{"deleted_date": time.Now()})
+	if err != nil {
+		return fmt.Errorf("post repository delete post: %w", err)
+	}
+	return nil
 }
 
 func (r postsRepository) GetPostsByUser(userID int64) ([]domain.Post, error) {
@@ -91,7 +90,7 @@ func (r postsRepository) GetPostsByUser(userID int64) ([]domain.Post, error) {
 
 	err := r.coll.Find(db.Cond{"user_id": userID}).All(&post)
 	if err != nil {
-		return []domain.Post{}, err
+		return []domain.Post{}, fmt.Errorf("post repository get post by user: %w", err)
 	}
 	return r.mapPostCollection(post), nil
 

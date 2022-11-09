@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"log"
@@ -40,17 +41,17 @@ func (p PostHandler) SavePost(ctx echo.Context) error {
 	var postRequest requests.PostRequest
 	err := ctx.Bind(&postRequest)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, err.Error()+"could not decode post data")
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not decode post data")
 	}
 	err = ctx.Validate(&postRequest)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
+		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, "Could not validate post data")
 	}
 	token := ctx.Get("user").(*jwt.Token)
 	post, err := p.service.SavePost(postRequest, token)
 	if err != nil {
 		log.Print(err)
-		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could not save new post: %s", err))
 	}
 	postResponse := domain.Post.DomainToResponse(post)
 	return response.Response(ctx, http.StatusCreated, postResponse)
@@ -71,15 +72,15 @@ func (p PostHandler) SavePost(ctx echo.Context) error {
 func (p PostHandler) GetPost(ctx echo.Context) error {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, err.Error()+"could not parse post ID")
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not parse post ID")
 	}
 	post, err := p.service.GetPost(id)
 	if err != nil {
 		log.Print(err)
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
+			return response.ErrorResponse(ctx, http.StatusNotFound, fmt.Sprintf("Could not get post: %s", err))
 		} else {
-			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could not get post: %s", err))
 		}
 	}
 	postResponse := domain.Post.DomainToResponse(post)
@@ -106,23 +107,22 @@ func (p PostHandler) UpdatePost(ctx echo.Context) error {
 	var postRequest requests.PostRequest
 	err := ctx.Bind(&postRequest)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, "could not decode post data")
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not decode post data")
 	}
 	err = ctx.Validate(&postRequest)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, err.Error())
+		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, "Could not validate post data")
 	}
 	postID, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, err.Error()+"could not parse post ID")
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not parse post ID")
 	}
-	token := ctx.Get("user").(*jwt.Token)
-	post, err := p.service.UpdatePost(postRequest, postID, token)
+	post, err := p.service.UpdatePost(postRequest, postID)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
+			return response.ErrorResponse(ctx, http.StatusNotFound, fmt.Sprintf("Could not get post: %s", err))
 		} else {
-			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could not get post: %s", err))
 		}
 	}
 	postResponse := domain.Post.DomainToResponse(post)
@@ -144,14 +144,14 @@ func (p PostHandler) UpdatePost(ctx echo.Context) error {
 func (p PostHandler) DeletePost(ctx echo.Context) error {
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, "could not parse post ID")
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not parse post ID")
 	}
 	err = p.service.DeletePost(id)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
-			return response.ErrorResponse(ctx, http.StatusNotFound, err.Error())
+			return response.ErrorResponse(ctx, http.StatusNotFound, fmt.Sprintf("Could not get post: %s", err))
 		} else {
-			return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could not get post: %s", err))
 		}
 	}
 	return response.MessageResponse(ctx, http.StatusOK, "Post successfully delete")

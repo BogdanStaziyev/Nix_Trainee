@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/upper/db/v4"
 	"time"
 	"trainee/internal/domain"
@@ -55,7 +56,7 @@ func (u userRepo) FindByEmail(email string) (domain.User, error) {
 		"deleted_date": nil,
 	}).One(&domainUser)
 	if err != nil {
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("user repository save user: %w", err)
 	}
 	return u.mapModelToDomain(domainUser), nil
 }
@@ -68,16 +69,20 @@ func (u userRepo) FindByID(id int64) (domain.User, error) {
 		"deleted_date": nil,
 	}).One(&domainUser)
 	if err != nil {
-		return domain.User{}, err
+		return domain.User{}, fmt.Errorf("user repository finde by id user: %w", err)
 	}
 	return u.mapModelToDomain(domainUser), nil
 }
 
 func (u userRepo) Delete(id int64) error {
-	return u.coll.Find(db.Cond{
+	err := u.coll.Find(db.Cond{
 		"id":           id,
 		"deleted_date": nil,
 	}).Update(map[string]interface{}{"deleted_date": time.Now()})
+	if err != nil {
+		return fmt.Errorf("user repository delete user: %w", err)
+	}
+	return nil
 }
 
 func (u userRepo) mapDomainToModel(d domain.User) user {
