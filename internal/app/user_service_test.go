@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 	smocks "trainee/internal/app/mocks"
 	"trainee/internal/domain"
@@ -58,10 +57,10 @@ func Test_userService_FindByEmail(t *testing.T) {
 			fmt.Println(user)
 			if tt.wantErr {
 				assert.Error(t, err)
-				require.Equal(t, user, domain.User{})
+				assert.Equal(t, user, tt.want)
 			} else {
 				assert.NoError(t, err)
-				require.Equal(t, user, tt.want)
+				assert.Equal(t, user, tt.want)
 			}
 		})
 	}
@@ -113,10 +112,10 @@ func Test_userService_FindByID(t *testing.T) {
 			fmt.Println(user)
 			if tt.wantErr {
 				assert.Error(t, err)
-				require.Equal(t, user, domain.User{})
+				assert.Equal(t, user, tt.want)
 			} else {
 				assert.NoError(t, err)
-				require.Equal(t, user, tt.want)
+				assert.Equal(t, user, tt.want)
 			}
 		})
 	}
@@ -220,10 +219,10 @@ func Test_userService_Save(t *testing.T) {
 			user, err := NewUserService(us.userRepo, us.passwordGen).Save(tt.user)
 			if tt.wantErr {
 				assert.Error(t, err)
-				require.Equal(t, user, domain.User{})
+				assert.Equal(t, user, tt.want)
 			} else {
 				assert.NoError(t, err)
-				require.Equal(t, user, tt.want)
+				assert.Equal(t, user, tt.want)
 			}
 		})
 	}

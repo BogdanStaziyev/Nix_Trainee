@@ -93,7 +93,7 @@ func Test_postService_SavePost(t *testing.T) {
 			post, err := NewPostService(s.repo).SavePost(tt.postRequest, tt.token)
 			if tt.wantErr {
 				assert.Error(t, err)
-				require.Equal(t, post, domain.Post{})
+				require.Equal(t, post, tt.want)
 			} else {
 				assert.NoError(t, err)
 				require.Equal(t, post, tt.want)
@@ -147,7 +147,7 @@ func Test_postService_GetPost(t *testing.T) {
 			post, err := NewPostService(s.repo).GetPost(tt.id)
 			if tt.wantErr {
 				assert.Error(t, err)
-				require.Equal(t, post, domain.Post{})
+				require.Equal(t, post, tt.want)
 			} else {
 				assert.NoError(t, err)
 				require.Equal(t, post, tt.want)
@@ -225,11 +225,7 @@ func Test_postService_UpdatePost(t *testing.T) {
 					Return(domain.Post{}, errors.New("post repository update post"))
 				return mock
 			},
-			domain.Post{
-				ID:    2,
-				Title: "Title",
-				Body:  "Body",
-			},
+			domain.Post{},
 			true,
 		},
 	}
@@ -246,7 +242,7 @@ func Test_postService_UpdatePost(t *testing.T) {
 			post, err := NewPostService(s.repo).UpdatePost(tt.postRequest, tt.postID)
 			if tt.wantErr {
 				assert.Error(t, err)
-				require.Equal(t, post, domain.Post{})
+				require.Equal(t, post, tt.want)
 			} else {
 				assert.NoError(t, err)
 				require.Equal(t, post, tt.want)
@@ -369,7 +365,7 @@ func Test_postService_GetPostsByUser(t *testing.T) {
 			posts, err := NewPostService(s.repo).GetPostsByUser(tt.userID)
 			if tt.wantErr {
 				assert.Error(t, err)
-				require.Equal(t, posts, []domain.Post{})
+				require.Equal(t, posts, tt.want)
 			} else {
 				assert.NoError(t, err)
 				require.Equal(t, posts, tt.want)
