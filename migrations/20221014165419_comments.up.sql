@@ -6,6 +6,3 @@ create table commentses
     email   varchar not null,
     body    varchar not null
 );
-
-alter table commentses
-    owner to postgres;

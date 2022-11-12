@@ -5,6 +5,3 @@ create table posts
     title    varchar not null,
     body     varchar not null
 );
-
-alter table posts
-    owner to postgres;

@@ -29,9 +29,9 @@ func GetConfiguration() Configuration {
 	}
 
 	return Configuration{
-		DatabaseName:      `coordinate`,
-		DatabaseHost:      `localhost:54322`,
-		DatabaseUser:      `postgres`,
+		DatabaseName:      `nix_db`,
+		DatabaseHost:      `localhost:8081`,
+		DatabaseUser:      `admin`,
 		DatabasePassword:  `password`,
 		MigrateToVersion:  migrateToVersion,
 		MigrationLocation: migrationLocation,
