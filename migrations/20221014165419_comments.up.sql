@@ -1,4 +1,4 @@
-create table commentses
+create table public.commentses
 (
     id      serial primary key,
     post_id integer not null,

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "eee0ffd5-cc8d-4ace-b232-43330422eaf7",
+		"_postman_id": "bff72743-95c1-429b-8c64-955fa18ea316",
 		"name": "NIX TRAINEE",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "20982235"
@@ -255,7 +255,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"email@mail.com\",\r\n    \"password\": \"qwerty12345\"\r\n}",
+							"raw": "{\n    \"email\": \"email@mail.com\",\n    \"password\": \"qwerty12345\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -324,7 +324,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSmFtZXMiLCJpZCI6NywiZXhwIjoxNjY3MzgzMTczfQ.kjmjFi4PEbLLRz1dQFLxul-UiZJRylGGpR2FSRaT8hU",
+				"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSmFtZXMiLCJpZCI6MSwiZXhwIjoxNjY4NTA2ODM3fQ.bhCYhArPNINVgHznLJ52Mxuu1ftPWTtKeq55z6hL4Ao",
 				"type": "string"
 			}
 		]

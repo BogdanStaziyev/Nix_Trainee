@@ -30,7 +30,7 @@ func GetConfiguration() Configuration {
 
 	return Configuration{
 		DatabaseName:      `nix_db`,
-		DatabaseHost:      `localhost:8081`,
+		DatabaseHost:      `db:5432`,
 		DatabaseUser:      `admin`,
 		DatabasePassword:  `password`,
 		MigrateToVersion:  migrateToVersion,

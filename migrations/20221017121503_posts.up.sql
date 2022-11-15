@@ -1,4 +1,4 @@
-create table posts
+create table public.posts
 (
     id       serial primary key,
     user_id  integer not null,
