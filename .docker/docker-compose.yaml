@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  app:
+    container_name: nix_app
+    environment:
+      - DB_NAME=nix_db
+      - DB_HOST=db
+      - DB_USER=admin
+      - DB_PASSWORD=password
+    build:
+      context: ../
+      dockerfile: .docker/dockerfile
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - default
+  db:
+    image: postgres:latest
+    container_name: db_Nix_Trainee
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=nix_db
+      - DATABASE_HOST=localhost:8081
+    ports:
+      - '8081:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+
+networks:
+  default:
+    driver: bridge
