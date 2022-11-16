@@ -53,7 +53,7 @@ func TestWalkPostSuccess(t *testing.T) {
 
 	requestDelete := test_case.Request{
 		Method: http.MethodDelete,
-		Url:    "/delete" + postID,
+		Url:    "/delete/" + postID,
 		PathParam: &test_case.PathParam{
 			Name:  "id",
 			Value: postID,
