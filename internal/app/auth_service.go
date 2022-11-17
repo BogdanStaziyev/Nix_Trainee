@@ -17,6 +17,7 @@ const (
 	access  = 2
 )
 
+//go:generate mockery --dir . --name AuthService --output ./mocks
 type AuthService interface {
 	Register(user domain.User) (domain.User, error)
 	Login(user requests.LoginAuth) (domain.User, string, error)

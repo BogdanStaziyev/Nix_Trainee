@@ -51,7 +51,7 @@ func (c CommentHandler) SaveComment(ctx echo.Context) error {
 	}
 	postID, err := strconv.ParseInt(ctx.Param("post_id"), 10, 64)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, fmt.Sprintf("Could not parse comment ID: %s", err))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, fmt.Sprintf("Could not parse post ID"))
 	}
 	token := ctx.Get("user").(*jwt.Token)
 	comment, err := c.service.SaveComment(commentRequest, postID, token)
@@ -121,7 +121,7 @@ func (c CommentHandler) UpdateComment(ctx echo.Context) error {
 	}
 	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, fmt.Sprintf("Could not parse comment ID: %s", err))
+		return response.ErrorResponse(ctx, http.StatusBadRequest, fmt.Sprintf("Could not parse comment ID"))
 	}
 	comment, err := c.service.UpdateComment(commentRequest, id)
 	if err != nil {
