@@ -37,7 +37,7 @@ func New(conf config.Configuration) Container {
 	passwordGenerator := app.NewGeneratePasswordHash(bcrypt.DefaultCost)
 	userService := app.NewUserService(userRepository, passwordGenerator)
 	authService := app.NewAuthService(userService, conf)
-	registerController := handlers.NewRegisterHandler(userService, authService)
+	registerController := handlers.NewRegisterHandler(authService)
 	oauthController := handlers.NewOauthHandler(userService, authService)
 
 	postRepository := database.NewPostRepository(sess)
