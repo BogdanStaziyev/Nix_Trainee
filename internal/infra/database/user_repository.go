@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/upper/db/v4"
+	"strings"
 	"time"
 	"trainee/internal/domain"
 )
@@ -50,7 +51,7 @@ func (u userRepo) Save(user domain.User) (domain.User, error) {
 
 func (u userRepo) FindByEmail(email string) (domain.User, error) {
 	var domainUser user
-
+	email = strings.ToLower(email)
 	err := u.coll.Find(db.Cond{
 		"email":        email,
 		"deleted_date": nil,
@@ -88,7 +89,7 @@ func (u userRepo) Delete(id int64) error {
 func (u userRepo) mapDomainToModel(d domain.User) user {
 	return user{
 		ID:       d.ID,
-		Email:    d.Email,
+		Email:    strings.ToLower(d.Email),
 		Password: d.Password,
 		Name:     d.Name,
 	}
