@@ -12,13 +12,11 @@ import (
 )
 
 type RegisterHandler struct {
-	us app.UserService
 	as app.AuthService
 }
 
-func NewRegisterHandler(u app.UserService, a app.AuthService) RegisterHandler {
+func NewRegisterHandler(a app.AuthService) RegisterHandler {
 	return RegisterHandler{
-		us: u,
 		as: a,
 	}
 }
@@ -47,7 +45,7 @@ func (r RegisterHandler) Register(ctx echo.Context) error {
 
 	user, err := r.as.Register(userFromRegister)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, fmt.Sprintf("Could not save new user: %s", err))
+		return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could not save new user: %s", err))
 	}
 	userResponse := domain.User.DomainToResponse(user)
 	return response.Response(ctx, http.StatusCreated, userResponse)
@@ -71,19 +69,19 @@ func (r RegisterHandler) Login(ctx echo.Context) error {
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not decode user data")
 	}
 	if err := ctx.Validate(&authUser); err != nil {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not validate user data")
+		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, "Could not validate user data")
 	}
 	user, refreshToken, err := r.as.Login(authUser)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
 			return response.ErrorResponse(ctx, http.StatusNotFound, fmt.Sprintf("Could not login, user not exists: %s", err))
 		} else {
-			return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could login user: %s", err))
+			return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could not login user: %s", err))
 		}
 	}
 	accessToken, exp, err := r.as.CreateAccessToken(user)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Unauthorized Could not create access token: %s", err))
+		return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Unauthorized could not create access token: %s", err))
 	}
 	res := response.NewLoginResponse(accessToken, refreshToken, exp)
 	return response.Response(ctx, http.StatusOK, res)
