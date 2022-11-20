@@ -29,14 +29,14 @@ func GetConfiguration() Configuration {
 	}
 
 	return Configuration{
-		DatabaseName:      `nix_db`,
-		DatabaseHost:      `db:5432`,
-		DatabaseUser:      `admin`,
-		DatabasePassword:  `password`,
+		DatabaseName:      os.Getenv("DB_NAME"),
+		DatabaseHost:      os.Getenv("DB_HOST"),
+		DatabaseUser:      os.Getenv("DB_USER"),
+		DatabasePassword:  os.Getenv("DB_PASSWORD"),
 		MigrateToVersion:  migrateToVersion,
 		MigrationLocation: migrationLocation,
-		AccessSecret:      "access",
-		RefreshSecret:     "refresh",
-		OAUTH:             LoadOAUTHConfiguration(),
+		AccessSecret:      os.Getenv("ACCESS_SECRET"),
+		RefreshSecret:     os.Getenv("REFRESH_SECRET"),
+		OAUTH:	LoadOAUTHConfiguration(),
 	}
 }
