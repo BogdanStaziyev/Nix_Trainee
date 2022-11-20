@@ -1,6 +1,8 @@
 package container
 
 import (
+	"fmt"
+	"github.com/go-redis/redis/v7"
 	"github.com/upper/db/v4"
 	"github.com/upper/db/v4/adapter/postgresql"
 	"golang.org/x/crypto/bcrypt"
@@ -32,6 +34,7 @@ type Handlers struct {
 
 func New(conf config.Configuration) Container {
 	sess := getDbSess(conf)
+	//newRedis := getRedis(conf)
 
 	userRepository := database.NewUSerRepo(sess)
 	passwordGenerator := app.NewGeneratePasswordHash(bcrypt.DefaultCost)
@@ -76,4 +79,11 @@ func getDbSess(conf config.Configuration) db.Session {
 		log.Fatalf("Unable to create new DB session: %q\n", err)
 	}
 	return sess
+}
+
+func getRedis(conf config.Configuration) *redis.Client {
+	addr := fmt.Sprintf("%s, %s", conf.RedisHost, conf.RedisPort)
+	return redis.NewClient(&redis.Options{
+		Addr: addr,
+	})
 }

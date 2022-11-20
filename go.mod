@@ -6,6 +6,7 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang-migrate/migrate/v4 v4.15.2
+	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.0
@@ -26,6 +27,7 @@ require (
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
+	github.com/go-redis/redis/v7 v7.4.1 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v39 v39.2.0 // indirect

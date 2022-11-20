@@ -10,6 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"trainee/config"
 	"trainee/internal/app"
@@ -66,13 +67,12 @@ func (o OauthHandler) CallBackRegister(ctx echo.Context) error {
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not decode user data")
 	}
 	//todo change password creation
-	usr.Password = usr.ID + usr.Email
+	usr.Password = usr.ID + usr.Email + os.Getenv("CLIENT_SECRET")
 	userFromRegister := usr.RegisterToUser()
 	user, err := o.as.Register(userFromRegister)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "invalid credentials user exist") {
 			user, err = o.us.FindByEmail(userFromRegister.Email)
-			log.Println(userFromRegister)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("User not exist: %s", err))
 			}

@@ -40,9 +40,9 @@ func NewAuthService(us UserService, cf config.Configuration) AuthService {
 func (a authService) Register(user domain.User) (domain.User, error) {
 	_, err := a.userService.FindByEmail(user.Email)
 	if err == nil {
-		return domain.User{}, fmt.Errorf("auth service error register invalid credentials user exist: %w", err)
+		return domain.User{}, fmt.Errorf("auth service error register invalid credentials user exist")
 	} else if !errors.Is(err, db.ErrNoMoreRows) {
-		return domain.User{}, fmt.Errorf("auth service error register: %w", err)
+		return domain.User{}, fmt.Errorf("auth service error register")
 	}
 	user, err = a.userService.Save(user)
 	if err != nil {
