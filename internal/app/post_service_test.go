@@ -15,7 +15,7 @@ import (
 
 func token() *jwt.Token {
 	exp := time.Now().Add(time.Hour * access).Unix()
-	claimsAccess := &JwtAccessClaim{
+	claimsAccess := &JwtTokenClaim{
 		Name: "Name",
 		ID:   int64(1),
 		StandardClaims: jwt.StandardClaims{

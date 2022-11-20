@@ -46,7 +46,7 @@ func (u userService) FindByEmail(email string) (domain.User, error) {
 	user, err := u.userRepo.FindByEmail(email)
 	if err != nil {
 		log.Println(err)
-		return domain.User{}, fmt.Errorf("user service finde by email user: %w", err)
+		return domain.User{}, fmt.Errorf("user service find by email user: %w", err)
 	}
 	return user, nil
 }

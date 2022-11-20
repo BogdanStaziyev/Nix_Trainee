@@ -1,7 +1,6 @@
 package handlers_test
 
 import (
-	"errors"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/upper/db/v4"
@@ -129,13 +128,6 @@ func TestRegisterHandler_Login(t *testing.T) {
 		Password: "qwerty1234",
 	}
 
-	userMockDomain := domain.User{
-		ID:       1,
-		Email:    "user@mail.com",
-		Name:     "Name",
-		Password: "qwerty1234",
-	}
-
 	requestRegister := test_case.Request{
 		Method: http.MethodPost,
 		Url:    "/login",
@@ -143,8 +135,7 @@ func TestRegisterHandler_Login(t *testing.T) {
 	handleSuccessLogin := func(c echo.Context) error {
 		mockAuth := func(user requests.LoginAuth) app.AuthService {
 			mock := mocks.NewAuthService(t)
-			mock.On("Login", user).Return(userMockDomain, "refresh", nil).Times(1).
-				On("CreateAccessToken", userMockDomain).Return("access", int64(123), nil)
+			mock.On("Login", user).Return("access", "refresh", int64(123), nil).Times(1)
 			return mock
 		}(userMockRequest)
 		return handlers.NewRegisterHandler(mockAuth).Login(c)
@@ -153,7 +144,7 @@ func TestRegisterHandler_Login(t *testing.T) {
 	handleErrorLoginNoMoreRows := func(c echo.Context) error {
 		mockAuth := func(user requests.LoginAuth) app.AuthService {
 			mock := mocks.NewAuthService(t)
-			mock.On("Login", user).Return(domain.User{}, "", db.ErrNoMoreRows).Times(1)
+			mock.On("Login", user).Return("", "", int64(0), db.ErrNoMoreRows).Times(1)
 			return mock
 		}(userMockRequest)
 		return handlers.NewRegisterHandler(mockAuth).Login(c)
@@ -162,17 +153,7 @@ func TestRegisterHandler_Login(t *testing.T) {
 	handleErrorLoginInternalServerError := func(c echo.Context) error {
 		mockAuth := func(user requests.LoginAuth) app.AuthService {
 			mock := mocks.NewAuthService(t)
-			mock.On("Login", user).Return(domain.User{}, "", db.ErrCollectionDoesNotExist).Times(1)
-			return mock
-		}(userMockRequest)
-		return handlers.NewRegisterHandler(mockAuth).Login(c)
-	}
-
-	handleErrorAccessTokenCreateInternalServer := func(c echo.Context) error {
-		mockAuth := func(user requests.LoginAuth) app.AuthService {
-			mock := mocks.NewAuthService(t)
-			mock.On("Login", user).Return(userMockDomain, "refresh", nil).Times(1).
-				On("CreateAccessToken", userMockDomain).Return("", int64(0), errors.New("auth service error create access token"))
+			mock.On("Login", user).Return("", "", int64(0), db.ErrCollectionDoesNotExist).Times(1)
 			return mock
 		}(userMockRequest)
 		return handlers.NewRegisterHandler(mockAuth).Login(c)
@@ -212,15 +193,6 @@ func TestRegisterHandler_Login(t *testing.T) {
 			test_case.ExpectedResponse{
 				StatusCode: 500,
 				BodyPart:   "{\"code\":500,\"error\":\"Could not login user: upper: collection does not exist\"}\n"},
-		},
-		{
-			"LoginUser error login internal server error",
-			requestRegister,
-			userMockRequest,
-			handleErrorAccessTokenCreateInternalServer,
-			test_case.ExpectedResponse{
-				StatusCode: 500,
-				BodyPart:   "{\"code\":500,\"error\":\"Unauthorized could not create access token: auth service error create access token\"}\n"},
 		},
 		{
 			"Error decode user data",

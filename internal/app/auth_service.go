@@ -1,11 +1,15 @@
 package app
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v7"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/upper/db/v4"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/sync/errgroup"
 	"time"
 	"trainee/config"
 	"trainee/internal/domain"
@@ -13,36 +17,38 @@ import (
 )
 
 const (
-	refresh = 144
+	refresh = 48
 	access  = 2
+	LogOF   = 10
 )
 
 //go:generate mockery --dir . --name AuthService --output ./mocks
 type AuthService interface {
 	Register(user domain.User) (domain.User, error)
-	Login(user requests.LoginAuth) (domain.User, string, error)
-	CreateRefreshToken(user domain.User) (string, error)
-	CreateAccessToken(user domain.User) (string, int64, error)
+	Login(user requests.LoginAuth) (string, string, int64, error)
+	ValidateJWT(tokenUID string, userID int64, isRefresh bool) (domain.User, error)
 }
 
 type authService struct {
 	userService UserService
 	config      config.Configuration
+	r           *redis.Client
 }
 
-func NewAuthService(us UserService, cf config.Configuration) AuthService {
+func NewAuthService(us UserService, cf config.Configuration, red *redis.Client) AuthService {
 	return authService{
 		userService: us,
 		config:      cf,
+		r:           red,
 	}
 }
 
 func (a authService) Register(user domain.User) (domain.User, error) {
 	_, err := a.userService.FindByEmail(user.Email)
 	if err == nil {
-		return domain.User{}, fmt.Errorf("auth service error register invalid credentials user exist: %w", err)
+		return domain.User{}, fmt.Errorf("auth service error register invalid credentials user exist")
 	} else if !errors.Is(err, db.ErrNoMoreRows) {
-		return domain.User{}, fmt.Errorf("auth service error register: %w", err)
+		return domain.User{}, fmt.Errorf("auth service error register")
 	}
 	user, err = a.userService.Save(user)
 	if err != nil {
@@ -51,69 +57,101 @@ func (a authService) Register(user domain.User) (domain.User, error) {
 	return user, nil
 }
 
-func (a authService) Login(user requests.LoginAuth) (domain.User, string, error) {
+func (a authService) Login(user requests.LoginAuth) (string, string, int64, error) {
 	u, err := a.userService.FindByEmail(user.Email)
 	if err != nil {
 		if errors.Is(err, db.ErrNoMoreRows) {
-			return domain.User{}, "", fmt.Errorf("auth service error login, invalid credentials user not exist: %w", err)
+			return "", "", 0, fmt.Errorf("auth service error login, invalid credentials user not exist: %w", err)
 		}
-		return domain.User{}, "", fmt.Errorf("auth service error login user invalid email or password: %w", err)
+		return "", "", 0, fmt.Errorf("auth service error login user invalid email or password: %w", err)
 	}
 	valid := a.checkPasswordHash(user.Password, u.Password)
 	if !valid {
-		return domain.User{}, "", fmt.Errorf("auth service error login user invalid email or password: %w", err)
+		return "", "", 0, fmt.Errorf("auth service error login user invalid email or password: %w", err)
 	}
-	token, err := a.CreateRefreshToken(u)
+	accessToken, accessUID, exp, err := createToken(u, access, a.config.AccessSecret)
 	if err != nil {
-		return domain.User{}, "", fmt.Errorf("auth service error login: %w", err)
+		return "", "", 0, fmt.Errorf("auth service error login: %w", err)
 	}
-	return u, token, nil
+	refreshToken, refreshUID, _, err := createToken(u, refresh, a.config.RefreshSecret)
+
+	tokensJSON, err := json.Marshal(RedisToken{
+		AccessID:  accessUID,
+		RefreshID: refreshUID,
+	})
+	if err != nil {
+		return "", "", 0, fmt.Errorf("auth service error, couldn't marshal token pair, %w", err)
+	}
+
+	a.r.Set(fmt.Sprintf("token-%d", u.ID), string(tokensJSON), time.Minute*LogOF)
+	return accessToken, refreshToken, exp, err
 }
 
-func (a authService) CreateRefreshToken(user domain.User) (string, error) {
-	claimsRefresh := JwtRefreshClaim{
-		ID: user.ID,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * refresh).Unix(),
-		},
-	}
-	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsRefresh)
+func (a authService) ValidateJWT(tokenUID string, userID int64, isRefresh bool) (user domain.User, err error) {
+	var g errgroup.Group
+	g.Go(func() error {
+		tokensJSON, err := a.r.Get(fmt.Sprintf("token-%d", userID)).Result()
+		if err != nil {
+			return fmt.Errorf("auth service error validate token: %w", err)
+		}
+		var redisToken RedisToken
+		err = json.Unmarshal([]byte(tokensJSON), &redisToken)
 
-	token, err := refreshToken.SignedString([]byte(a.config.RefreshSecret))
-	if err != nil {
-		return "", fmt.Errorf("auth service error create refresh token: %w", err)
-	}
-	return token, nil
+		var uid string
+		if isRefresh {
+			uid = redisToken.RefreshID
+		} else {
+			uid = redisToken.AccessID
+		}
+
+		if err != nil || uid != tokenUID {
+			return fmt.Errorf("token not exist: %w", err)
+		}
+		return nil
+	})
+
+	g.Go(func() error {
+		user, err = a.userService.FindByID(userID)
+		if err != nil {
+			return fmt.Errorf("auth service error validate jwt invalid credentials user not exist, %w", err)
+		}
+		return nil
+	})
+
+	err = g.Wait()
+
+	return user, err
 }
 
-func (a authService) CreateAccessToken(user domain.User) (string, int64, error) {
-	exp := time.Now().Add(time.Hour * access).Unix()
-	claimsAccess := JwtAccessClaim{
+func createToken(user domain.User, expireTime int, secret string) (string, string, int64, error) {
+	exp := time.Now().Add(time.Hour * time.Duration(expireTime)).Unix()
+	uid := uuid.New().String()
+	claimsAccess := JwtTokenClaim{
 		Name: user.Name,
 		ID:   user.ID,
+		UID:  uid,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: exp,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimsAccess)
-	t, err := token.SignedString([]byte(a.config.AccessSecret))
-	if err != nil {
-		return "", 0, fmt.Errorf("auth service error create access token: %w", err)
-	}
-	return t, exp, err
+	t, err := token.SignedString([]byte(secret))
+
+	return t, uid, exp, err
 }
 
 func (a authService) checkPasswordHash(password, hash string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
 
-type JwtAccessClaim struct {
+type JwtTokenClaim struct {
 	Name string `json:"name"`
 	ID   int64  `json:"id"`
+	UID  string `json:"uid"`
 	jwt.StandardClaims
 }
 
-type JwtRefreshClaim struct {
-	ID int64 `json:"id"`
-	jwt.StandardClaims
+type RedisToken struct {
+	AccessID  string `json:"access"`
+	RefreshID string `json:"refresh"`
 }

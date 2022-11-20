@@ -7,6 +7,7 @@ services:
       - DB_HOST=db
       - DB_USER=admin
       - DB_PASSWORD=password
+      - REDIS_URL=nix_redis
     build:
       context: ../
       dockerfile: .docker/dockerfile
@@ -15,6 +16,14 @@ services:
     restart: unless-stopped
     depends_on:
       - db
+    networks:
+      - default
+  nix_redis:
+    image: redis
+    container_name: redis_for_nix
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
     networks:
       - default
   db:

@@ -115,7 +115,7 @@ definitions:
       name:
         type: string
     type: object
-host: localhost:8000
+host: localhost:8080
 info:
   contact: {}
   description: REST service for NIX TRAINEE PROGRAM
@@ -440,6 +440,10 @@ paths:
             $ref: '#/definitions/response.Error'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Error'
+        "500":
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Error'
       summary: LoginAuth

@@ -71,17 +71,13 @@ func (r RegisterHandler) Login(ctx echo.Context) error {
 	if err := ctx.Validate(&authUser); err != nil {
 		return response.ErrorResponse(ctx, http.StatusUnprocessableEntity, "Could not validate user data")
 	}
-	user, refreshToken, err := r.as.Login(authUser)
+	accessToken, refreshToken, exp, err := r.as.Login(authUser)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "upper: no more rows in this result set") {
 			return response.ErrorResponse(ctx, http.StatusNotFound, fmt.Sprintf("Could not login, user not exists: %s", err))
 		} else {
 			return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could not login user: %s", err))
 		}
-	}
-	accessToken, exp, err := r.as.CreateAccessToken(user)
-	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Unauthorized could not create access token: %s", err))
 	}
 	res := response.NewLoginResponse(accessToken, refreshToken, exp)
 	return response.Response(ctx, http.StatusOK, res)
