@@ -518,6 +518,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.Error"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Error"
+                        }
                     }
                 }
             }
@@ -744,7 +750,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "V1.echo",
-	Host:             "localhost:8000",
+	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "NIX TRAINEE PROGRAM Demo App",

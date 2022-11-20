@@ -32,7 +32,7 @@ func NewCommentService(repo database.CommentRepo, us UserService, ps PostService
 }
 
 func (s commentService) SaveComment(commentRequest requests.CommentRequest, postID int64, token *jwt.Token) (domain.Comment, error) {
-	claims := token.Claims.(*JwtAccessClaim)
+	claims := token.Claims.(*JwtTokenClaim)
 	_, err := s.ps.GetPost(postID)
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("service error save comment: %w", err)

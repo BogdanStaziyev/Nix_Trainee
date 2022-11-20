@@ -11,11 +11,13 @@ import (
 	"trainee/internal/app"
 	"trainee/internal/infra/database"
 	"trainee/internal/infra/http/handlers"
+	"trainee/middleware"
 )
 
 type Container struct {
 	Services
 	Handlers
+	Middleware
 }
 
 type Services struct {
@@ -32,14 +34,18 @@ type Handlers struct {
 	handlers.OauthHandler
 }
 
+type Middleware struct {
+	middleware.AuthMiddleware
+}
+
 func New(conf config.Configuration) Container {
 	sess := getDbSess(conf)
-	//newRedis := getRedis(conf)
+	newRedis := getRedis(conf)
 
 	userRepository := database.NewUSerRepo(sess)
 	passwordGenerator := app.NewGeneratePasswordHash(bcrypt.DefaultCost)
 	userService := app.NewUserService(userRepository, passwordGenerator)
-	authService := app.NewAuthService(userService, conf)
+	authService := app.NewAuthService(userService, conf, newRedis)
 	registerController := handlers.NewRegisterHandler(authService)
 	oauthController := handlers.NewOauthHandler(userService, authService)
 
@@ -50,6 +56,8 @@ func New(conf config.Configuration) Container {
 	commentRepository := database.NewCommentRepository(sess)
 	commentService := app.NewCommentService(commentRepository, userService, postService)
 	commentHandler := handlers.NewCommentHandler(commentService)
+
+	authMiddleware := middleware.NewMiddleware(authService, newRedis)
 
 	return Container{
 		Services: Services{
@@ -63,6 +71,9 @@ func New(conf config.Configuration) Container {
 			postHandler,
 			registerController,
 			oauthController,
+		},
+		Middleware: Middleware{
+			authMiddleware,
 		},
 	}
 }
@@ -82,7 +93,7 @@ func getDbSess(conf config.Configuration) db.Session {
 }
 
 func getRedis(conf config.Configuration) *redis.Client {
-	addr := fmt.Sprintf("%s, %s", conf.RedisHost, conf.RedisPort)
+	addr := fmt.Sprintf("%s:%s", conf.RedisHost, conf.RedisPort)
 	return redis.NewClient(&redis.Options{
 		Addr: addr,
 	})

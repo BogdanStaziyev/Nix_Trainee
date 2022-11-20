@@ -29,7 +29,7 @@ func NewPostService(repo database.PostRepo) PostService {
 }
 
 func (s postService) SavePost(postRequest requests.PostRequest, token *jwt.Token) (domain.Post, error) {
-	claim := token.Claims.(*JwtAccessClaim)
+	claim := token.Claims.(*JwtTokenClaim)
 	userID := claim.ID
 	domainPost := domain.Post{
 		Title:  postRequest.Title,

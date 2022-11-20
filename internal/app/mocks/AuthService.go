@@ -15,64 +15,15 @@ type AuthService struct {
 	mock.Mock
 }
 
-// CreateAccessToken provides a mock function with given fields: user
-func (_m *AuthService) CreateAccessToken(user domain.User) (string, int64, error) {
-	ret := _m.Called(user)
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func(domain.User) string); ok {
-		r0 = rf(user)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	var r1 int64
-	if rf, ok := ret.Get(1).(func(domain.User) int64); ok {
-		r1 = rf(user)
-	} else {
-		r1 = ret.Get(1).(int64)
-	}
-
-	var r2 error
-	if rf, ok := ret.Get(2).(func(domain.User) error); ok {
-		r2 = rf(user)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
-}
-
-// CreateRefreshToken provides a mock function with given fields: user
-func (_m *AuthService) CreateRefreshToken(user domain.User) (string, error) {
-	ret := _m.Called(user)
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func(domain.User) string); ok {
-		r0 = rf(user)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(domain.User) error); ok {
-		r1 = rf(user)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // Login provides a mock function with given fields: user
-func (_m *AuthService) Login(user requests.LoginAuth) (domain.User, string, error) {
+func (_m *AuthService) Login(user requests.LoginAuth) (string, string, int64, error) {
 	ret := _m.Called(user)
 
-	var r0 domain.User
-	if rf, ok := ret.Get(0).(func(requests.LoginAuth) domain.User); ok {
+	var r0 string
+	if rf, ok := ret.Get(0).(func(requests.LoginAuth) string); ok {
 		r0 = rf(user)
 	} else {
-		r0 = ret.Get(0).(domain.User)
+		r0 = ret.Get(0).(string)
 	}
 
 	var r1 string
@@ -82,14 +33,21 @@ func (_m *AuthService) Login(user requests.LoginAuth) (domain.User, string, erro
 		r1 = ret.Get(1).(string)
 	}
 
-	var r2 error
-	if rf, ok := ret.Get(2).(func(requests.LoginAuth) error); ok {
+	var r2 int64
+	if rf, ok := ret.Get(2).(func(requests.LoginAuth) int64); ok {
 		r2 = rf(user)
 	} else {
-		r2 = ret.Error(2)
+		r2 = ret.Get(2).(int64)
 	}
 
-	return r0, r1, r2
+	var r3 error
+	if rf, ok := ret.Get(3).(func(requests.LoginAuth) error); ok {
+		r3 = rf(user)
+	} else {
+		r3 = ret.Error(3)
+	}
+
+	return r0, r1, r2, r3
 }
 
 // Register provides a mock function with given fields: user
@@ -106,6 +64,27 @@ func (_m *AuthService) Register(user domain.User) (domain.User, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func(domain.User) error); ok {
 		r1 = rf(user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ValidateJWT provides a mock function with given fields: tokenUID, userID, isRefresh
+func (_m *AuthService) ValidateJWT(tokenUID string, userID int64, isRefresh bool) (domain.User, error) {
+	ret := _m.Called(tokenUID, userID, isRefresh)
+
+	var r0 domain.User
+	if rf, ok := ret.Get(0).(func(string, int64, bool) domain.User); ok {
+		r0 = rf(tokenUID, userID, isRefresh)
+	} else {
+		r0 = ret.Get(0).(domain.User)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, int64, bool) error); ok {
+		r1 = rf(tokenUID, userID, isRefresh)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -54,7 +54,7 @@ func PrepareContextFromTestCase(test TestCase) (c echo.Context, recorder *httpte
 
 func Token() *jwt.Token {
 	exp := time.Now().Add(time.Hour * 2).Unix()
-	claimsAccess := &app.JwtAccessClaim{
+	claimsAccess := &app.JwtTokenClaim{
 		Name: "Name",
 		ID:   int64(1),
 		StandardClaims: jwt.StandardClaims{

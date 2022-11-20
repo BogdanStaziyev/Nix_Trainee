@@ -49,6 +49,6 @@ func GetConfiguration() Configuration {
 		RefreshSecret:     os.Getenv("REFRESH_SECRET_"),
 		OAUTH:             LoadOAUTHConfiguration(),
 		RedisPort:         "6379",
-		RedisHost:         "echo_redis",
+		RedisHost:         "127.0.0.1",
 	}
 }
