@@ -10,7 +10,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"trainee/config"
 	"trainee/internal/app"
@@ -66,7 +65,7 @@ func (o OauthHandler) CallBackRegister(ctx echo.Context) error {
 	if err != nil {
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not decode user data")
 	}
-	usr.Password = usr.ID + usr.Email + os.Getenv("CLIENT_SECRET")
+	usr.Password = usr.ID + usr.Email + config.LoadOAUTHConfiguration().ClientID
 	userFromRegister := usr.RegisterToUser()
 	user, err := o.as.Register(userFromRegister)
 	if err != nil {
