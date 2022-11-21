@@ -69,42 +69,42 @@ func TestRegisterHandler_Register(t *testing.T) {
 
 	cases := []test_case.TestCase{
 		{
-			"RegisterUser success",
-			requestRegister,
-			userMockRequest,
-			handleSuccessCreate,
-			test_case.ExpectedResponse{
+			TestName:    "RegisterUser success",
+			Request:     requestRegister,
+			RequestBody: userMockRequest,
+			HandlerFunc: handleSuccessCreate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 201,
 				BodyPart:   "{\"id\":1,\"email\":\"user@mail.com\",\"name\":\"Name\"}\n"},
 		},
 		{
-			"RegisterUser error",
-			requestRegister,
-			userMockRequest,
-			handleErrorCreate,
-			test_case.ExpectedResponse{
+			TestName:    "RegisterUser error",
+			Request:     requestRegister,
+			RequestBody: userMockRequest,
+			HandlerFunc: handleErrorCreate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 				BodyPart:   "{\"code\":500,\"error\":\"Could not save new user: upper: collection does not exist\"}\n"},
 		},
 		{
-			"Error decode user data",
-			requestRegister,
-			"",
-			handleMock,
-			test_case.ExpectedResponse{
+			TestName:    "Error decode user data",
+			Request:     requestRegister,
+			RequestBody: "",
+			HandlerFunc: handleMock,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not decode user data\"}\n"},
 		},
 		{
-			"Error validate user data",
-			requestRegister,
-			requests.RegisterAuth{
+			TestName: "Error validate user data",
+			Request:  requestRegister,
+			RequestBody: requests.RegisterAuth{
 				Email:    "user@email.com",
 				Password: "qwerty123",
 				Name:     "",
 			},
-			handleMock,
-			test_case.ExpectedResponse{
+			HandlerFunc: handleMock,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 422,
 				BodyPart:   "{\"code\":422,\"error\":\"Could not validate user data\"}\n"},
 		},
@@ -168,50 +168,50 @@ func TestRegisterHandler_Login(t *testing.T) {
 
 	cases := []test_case.TestCase{
 		{
-			"LoginUser success",
-			requestRegister,
-			userMockRequest,
-			handleSuccessLogin,
-			test_case.ExpectedResponse{
+			TestName:    "LoginUser success",
+			Request:     requestRegister,
+			RequestBody: userMockRequest,
+			HandlerFunc: handleSuccessLogin,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 200,
 				BodyPart:   "{\"accessToken\":\"access\",\"refreshToken\":\"refresh\",\"exp\":123}\n"},
 		},
 		{
-			"LoginUser error login no more rows",
-			requestRegister,
-			userMockRequest,
-			handleErrorLoginNoMoreRows,
-			test_case.ExpectedResponse{
+			TestName:    "LoginUser error login no more rows",
+			Request:     requestRegister,
+			RequestBody: userMockRequest,
+			HandlerFunc: handleErrorLoginNoMoreRows,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 404,
 				BodyPart:   "{\"code\":404,\"error\":\"Could not login, user not exists: upper: no more rows in this result set\"}\n"},
 		},
 		{
-			"LoginUser error login no more rows",
-			requestRegister,
-			userMockRequest,
-			handleErrorLoginInternalServerError,
-			test_case.ExpectedResponse{
+			TestName:    "LoginUser error login no more rows",
+			Request:     requestRegister,
+			RequestBody: userMockRequest,
+			HandlerFunc: handleErrorLoginInternalServerError,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 				BodyPart:   "{\"code\":500,\"error\":\"Could not login user: upper: collection does not exist\"}\n"},
 		},
 		{
-			"Error decode user data",
-			requestRegister,
-			"",
-			handleMock,
-			test_case.ExpectedResponse{
+			TestName:    "Error decode user data",
+			Request:     requestRegister,
+			RequestBody: "",
+			HandlerFunc: handleMock,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not decode user data\"}\n"},
 		},
 		{
-			"Error validate user data",
-			requestRegister,
-			requests.LoginAuth{
+			TestName: "Error validate user data",
+			Request:  requestRegister,
+			RequestBody: requests.LoginAuth{
 				Email:    "user@email.com",
 				Password: "",
 			},
-			handleMock,
-			test_case.ExpectedResponse{
+			HandlerFunc: handleMock,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 422,
 				BodyPart:   "{\"code\":422,\"error\":\"Could not validate user data\"}\n"},
 		},

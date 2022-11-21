@@ -129,38 +129,38 @@ func TestWalkPostSuccess(t *testing.T) {
 
 	cases := []test_case.TestCase{
 		{
-			"GetPost Success",
-			requestGet,
-			"",
-			handleFuncGet,
-			test_case.ExpectedResponse{
+			TestName:    "GetPost Success",
+			Request:     requestGet,
+			RequestBody: "",
+			HandlerFunc: handleFuncGet,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 200,
 				BodyPart:   "{\"id\":1,\"user_id\":1,\"title\":\"title\",\"body\":\"body\"}\n"},
 		},
 		{
-			"SavePost Success",
-			requestSave,
-			requestPostMock,
-			handleFuncSave,
-			test_case.ExpectedResponse{
+			TestName:    "SavePost Success",
+			Request:     requestSave,
+			RequestBody: requestPostMock,
+			HandlerFunc: handleFuncSave,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 201,
 				BodyPart:   "{\"id\":1,\"user_id\":1,\"title\":\"title\",\"body\":\"body\"}\n"},
 		},
 		{
-			"UpdatePost Success",
-			requestUpdate,
-			requestPostMock,
-			handleFuncUpdate,
-			test_case.ExpectedResponse{
+			TestName:    "UpdatePost Success",
+			Request:     requestUpdate,
+			RequestBody: requestPostMock,
+			HandlerFunc: handleFuncUpdate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 200,
 				BodyPart:   "{\"id\":1,\"user_id\":1,\"title\":\"title\",\"body\":\"body\"}\n"},
 		},
 		{
-			"DeletePost Success",
-			requestDelete,
-			"",
-			handleFuncDelete,
-			test_case.ExpectedResponse{
+			TestName:    "DeletePost Success",
+			Request:     requestDelete,
+			RequestBody: "",
+			HandlerFunc: handleFuncDelete,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 200,
 			},
 		},
@@ -213,69 +213,69 @@ func TestWalkPostsDecodeValidationParsingErrors(t *testing.T) {
 
 	cases := []test_case.TestCase{
 		{
-			"UpdatePost post data error",
-			requestUpdate,
-			"",
-			handleFuncUpdate,
-			test_case.ExpectedResponse{
+			TestName:    "UpdatePost post data error",
+			Request:     requestUpdate,
+			RequestBody: "",
+			HandlerFunc: handleFuncUpdate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not decode post data\"}\n"},
 		},
 		{
-			"SavePost post data error",
-			requestSave,
-			"",
-			handleFuncSave,
-			test_case.ExpectedResponse{
+			TestName:    "SavePost post data error",
+			Request:     requestSave,
+			RequestBody: "",
+			HandlerFunc: handleFuncSave,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not decode post data\"}\n"},
 		},
 		{
-			"UpdatePost validate error",
-			requestUpdate,
-			requests.PostRequest{
+			TestName: "UpdatePost validate error",
+			Request:  requestUpdate,
+			RequestBody: requests.PostRequest{
 				Title: "title",
 			},
-			handleFuncUpdate,
-			test_case.ExpectedResponse{
+			HandlerFunc: handleFuncUpdate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 422,
 				BodyPart:   "{\"code\":422,\"error\":\"Could not validate post data\"}\n"},
 		},
 		{
-			"SavePost validate error",
-			requestSave,
-			requests.PostRequest{
+			TestName: "SavePost validate error",
+			Request:  requestSave,
+			RequestBody: requests.PostRequest{
 				Title: "title",
 			},
-			handleFuncSave,
-			test_case.ExpectedResponse{
+			HandlerFunc: handleFuncSave,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 422,
 				BodyPart:   "{\"code\":422,\"error\":\"Could not validate post data\"}\n"},
 		},
 		{
-			"GetPost parse path param Error",
-			requestGetError,
-			"",
-			handleFuncGet,
-			test_case.ExpectedResponse{
+			TestName:    "GetPost parse path param Error",
+			Request:     requestGetError,
+			RequestBody: "",
+			HandlerFunc: handleFuncGet,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not parse post ID\"}\n"},
 		},
 		{
-			"UpdatePost parse path param Error",
-			requestUpdateError,
-			requestPostMock,
-			handleFuncUpdate,
-			test_case.ExpectedResponse{
+			TestName:    "UpdatePost parse path param Error",
+			Request:     requestUpdateError,
+			RequestBody: requestPostMock,
+			HandlerFunc: handleFuncUpdate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not parse post ID\"}\n"},
 		},
 		{
-			"DeletePost parse path param Error",
-			requestDeleteError,
-			"",
-			handleFuncDelete,
-			test_case.ExpectedResponse{
+			TestName:    "DeletePost parse path param Error",
+			Request:     requestDeleteError,
+			RequestBody: "",
+			HandlerFunc: handleFuncDelete,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 			},
 		},
@@ -358,63 +358,63 @@ func TestWalkPostServiceErrors(t *testing.T) {
 
 	cases := []test_case.TestCase{
 		{
-			"GetPost NoMoreRows",
-			requestGet,
-			"",
-			handleFuncGetNotFound,
-			test_case.ExpectedResponse{StatusCode: 404, BodyPart: "{\"code\":404,\"error\":\"Could not get post: upper: no more rows in this result set\"}\n"},
+			TestName:    "GetPost NoMoreRows",
+			Request:     requestGet,
+			RequestBody: "",
+			HandlerFunc: handleFuncGetNotFound,
+			Expected:    test_case.ExpectedResponse{StatusCode: 404, BodyPart: "{\"code\":404,\"error\":\"Could not get post: upper: no more rows in this result set\"}\n"},
 		},
 		{
-			"UpdatePost NoMoreRows",
-			requestUpdate,
-			requestPostMock,
-			handleFuncUpdateNotFound,
-			test_case.ExpectedResponse{
+			TestName:    "UpdatePost NoMoreRows",
+			Request:     requestUpdate,
+			RequestBody: requestPostMock,
+			HandlerFunc: handleFuncUpdateNotFound,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 404,
 				BodyPart:   "{\"code\":404,\"error\":\"Could not get post: upper: no more rows in this result set\"}\n"},
 		},
 		{
-			"DeletePost NoMoreRows",
-			requestDelete,
-			"",
-			handleFuncDeleteNotFound,
-			test_case.ExpectedResponse{
+			TestName:    "DeletePost NoMoreRows",
+			Request:     requestDelete,
+			RequestBody: "",
+			HandlerFunc: handleFuncDeleteNotFound,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 404,
 			},
 		},
 		{
-			"GetPost InternalServerError",
-			requestGet,
-			"",
-			handleFuncGetInternalServerError,
-			test_case.ExpectedResponse{
+			TestName:    "GetPost InternalServerError",
+			Request:     requestGet,
+			RequestBody: "",
+			HandlerFunc: handleFuncGetInternalServerError,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 				BodyPart:   "{\"code\":500,\"error\":\"Could not get post: upper: collection does not exist\"}\n"},
 		},
 		{
-			"UpdatePost InternalServerError",
-			requestUpdate,
-			requestPostMock,
-			handleFuncUpdateInternalServerError,
-			test_case.ExpectedResponse{
+			TestName:    "UpdatePost InternalServerError",
+			Request:     requestUpdate,
+			RequestBody: requestPostMock,
+			HandlerFunc: handleFuncUpdateInternalServerError,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 				BodyPart:   "{\"code\":500,\"error\":\"Could not get post: upper: collection does not exist\"}\n"},
 		},
 		{
-			"DeletePost InternalServerError",
-			requestDelete,
-			"",
-			handleFuncDeleteInternalServerError,
-			test_case.ExpectedResponse{
+			TestName:    "DeletePost InternalServerError",
+			Request:     requestDelete,
+			RequestBody: "",
+			HandlerFunc: handleFuncDeleteInternalServerError,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 			},
 		},
 		{
-			"SavePost InternalServerError",
-			requestSave,
-			requestPostMock,
-			handleFuncSaveInternalServerError,
-			test_case.ExpectedResponse{
+			TestName:    "SavePost InternalServerError",
+			Request:     requestSave,
+			RequestBody: requestPostMock,
+			HandlerFunc: handleFuncSaveInternalServerError,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 				BodyPart:   "{\"code\":500,\"error\":\"Could not save new post: upper: collection does not exist\"}\n"},
 		},

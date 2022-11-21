@@ -74,6 +74,9 @@ func (a authService) Login(user requests.LoginAuth) (string, string, int64, erro
 		return "", "", 0, fmt.Errorf("auth service error login: %w", err)
 	}
 	refreshToken, refreshUID, _, err := createToken(u, refresh, a.config.RefreshSecret)
+	if err != nil {
+		return "", "", 0, fmt.Errorf("auth service error login: %w", err)
+	}
 
 	tokensJSON, err := json.Marshal(RedisToken{
 		AccessID:  accessUID,
