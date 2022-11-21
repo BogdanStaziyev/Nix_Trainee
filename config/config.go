@@ -1,8 +1,11 @@
 package config
 
 import (
+	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
+	"log"
 	"os"
+	"path/filepath"
 )
 
 type Configuration struct {
@@ -15,6 +18,8 @@ type Configuration struct {
 	AccessSecret      string
 	RefreshSecret     string
 	OAUTH             oauth2.Config
+	RedisHost         string
+	RedisPort         string
 }
 
 func GetConfiguration() Configuration {
@@ -28,15 +33,22 @@ func GetConfiguration() Configuration {
 		migrateToVersion = "latest"
 	}
 
+	err := godotenv.Load(filepath.Join(".env"))
+	if err != nil {
+		log.Print(err)
+	}
+
 	return Configuration{
-		DatabaseName:      `nix_db`,
-		DatabaseHost:      `db:5432`,
-		DatabaseUser:      `admin`,
-		DatabasePassword:  `password`,
+		DatabaseName:      os.Getenv("NAME_DB"),
+		DatabaseHost:      os.Getenv("HOST_DB"),
+		DatabaseUser:      os.Getenv("USER_DB"),
+		DatabasePassword:  os.Getenv("PASSWORD_DB"),
 		MigrateToVersion:  migrateToVersion,
 		MigrationLocation: migrationLocation,
-		AccessSecret:      "access",
-		RefreshSecret:     "refresh",
+		AccessSecret:      os.Getenv("ACCESS_SECRET_"),
+		RefreshSecret:     os.Getenv("REFRESH_SECRET_"),
 		OAUTH:             LoadOAUTHConfiguration(),
+		RedisPort:         "6379",
+		RedisHost:         "127.0.0.1",
 	}
 }

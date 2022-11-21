@@ -65,14 +65,12 @@ func (o OauthHandler) CallBackRegister(ctx echo.Context) error {
 	if err != nil {
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not decode user data")
 	}
-	//todo change password creation
-	usr.Password = usr.ID + usr.Email
+	usr.Password = usr.ID + usr.Email + config.LoadOAUTHConfiguration().ClientID
 	userFromRegister := usr.RegisterToUser()
 	user, err := o.as.Register(userFromRegister)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "invalid credentials user exist") {
 			user, err = o.us.FindByEmail(userFromRegister.Email)
-			log.Println(userFromRegister)
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("User not exist: %s", err))
 			}
@@ -81,13 +79,12 @@ func (o OauthHandler) CallBackRegister(ctx echo.Context) error {
 			}
 		}
 	}
-	accessToken, exp, err := o.as.CreateAccessToken(user)
+	accessToken, refreshToken, exp, err := o.as.Login(requests.LoginAuth{
+		Email:    userFromRegister.Email,
+		Password: userFromRegister.Password,
+	})
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Google oauth error, coukd not create access token: %s", err))
-	}
-	refreshToken, err := o.as.CreateRefreshToken(user)
-	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Google oauth error, coukd not create access token: %s", err))
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
 	res := response.NewLoginResponse(accessToken, refreshToken, exp)
 	return response.Response(ctx, http.StatusOK, res)

@@ -213,7 +213,7 @@ func Test_commentService_SaveComment(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := commentService{
 				repo: tt.repo(tt.commentRequest),
-				us:   tt.us(tt.token.Claims.(*JwtAccessClaim).ID),
+				us:   tt.us(tt.token.Claims.(*JwtTokenClaim).ID),
 				ps:   tt.ps(tt.postID),
 			}
 			comment, err := NewCommentService(s.repo, s.us, s.ps).SaveComment(tt.commentRequest, tt.postID, tt.token)

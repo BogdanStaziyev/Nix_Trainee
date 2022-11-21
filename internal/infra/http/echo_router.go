@@ -1,14 +1,12 @@
 package http
 
 import (
-	"github.com/labstack/echo/v4/middleware"
+	MW "github.com/labstack/echo/v4/middleware"
 	"github.com/swaggo/echo-swagger"
 	"trainee/config"
 	"trainee/config/container"
-	"trainee/internal/app"
-	"trainee/internal/infra/http/validators"
-
 	_ "trainee/docs"
+	"trainee/internal/infra/http/validators"
 )
 
 func EchoRouter(s *Server, cont container.Container) {
@@ -16,7 +14,7 @@ func EchoRouter(s *Server, cont container.Container) {
 	e := s.Echo
 	e.GET("/auth/google/login", cont.OauthHandler.GetInfo)
 	e.GET("/auth/google/callback", cont.OauthHandler.CallBackRegister)
-	e.Use(middleware.Logger())
+	e.Use(MW.Logger())
 	e.Validator = validators.NewValidator()
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
@@ -26,16 +24,13 @@ func EchoRouter(s *Server, cont container.Container) {
 	v1 := e.Group("/api/v1")
 	v1.GET("", PingHandler)
 
-	conf := middleware.JWTConfig{
-		Claims:     &app.JwtAccessClaim{},
-		SigningKey: []byte(config.GetConfiguration().AccessSecret),
-	}
-
+	authMW := cont.AuthMiddleware.JWT(config.GetConfiguration().AccessSecret)
+	validToken := cont.AuthMiddleware.ValidateJWT()
 	commRouter := v1.Group("/comments/")
 	postRouter := v1.Group("/posts/")
 
-	commRouter.Use(middleware.JWTWithConfig(conf))
-	postRouter.Use(middleware.JWTWithConfig(conf))
+	commRouter.Use(authMW, validToken)
+	postRouter.Use(authMW, validToken)
 
 	commRouter.POST("save/:post_id", cont.CommentHandler.SaveComment)
 	commRouter.GET("comment/:id", cont.CommentHandler.GetComment)

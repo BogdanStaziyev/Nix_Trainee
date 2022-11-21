@@ -16,7 +16,7 @@ import (
 // @in header
 // @name Authorization
 
-// @host 		localhost:8000
+// @host 		localhost:8080
 // @BasePath 	/
 func main() {
 	var conf = config.GetConfiguration()

@@ -1,6 +1,7 @@
 version: '3.9'
 services:
   app:
+    image: staziyev/nix:1.0.0
     container_name: nix_app
     environment:
       - DB_NAME=nix_db
@@ -8,9 +9,6 @@ services:
       - DB_USER=admin
       - DB_PASSWORD=password
       - REDIS_URL=nix_redis
-    build:
-      context: ../
-      dockerfile: .docker/dockerfile
     ports:
       - "8080:8080"
     restart: unless-stopped

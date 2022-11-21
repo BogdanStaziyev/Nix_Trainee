@@ -1,6 +1,8 @@
 package container
 
 import (
+	"fmt"
+	"github.com/go-redis/redis/v7"
 	"github.com/upper/db/v4"
 	"github.com/upper/db/v4/adapter/postgresql"
 	"golang.org/x/crypto/bcrypt"
@@ -9,11 +11,13 @@ import (
 	"trainee/internal/app"
 	"trainee/internal/infra/database"
 	"trainee/internal/infra/http/handlers"
+	"trainee/middleware"
 )
 
 type Container struct {
 	Services
 	Handlers
+	Middleware
 }
 
 type Services struct {
@@ -30,14 +34,19 @@ type Handlers struct {
 	handlers.OauthHandler
 }
 
+type Middleware struct {
+	middleware.AuthMiddleware
+}
+
 func New(conf config.Configuration) Container {
 	sess := getDbSess(conf)
+	newRedis := getRedis(conf)
 
 	userRepository := database.NewUSerRepo(sess)
 	passwordGenerator := app.NewGeneratePasswordHash(bcrypt.DefaultCost)
 	userService := app.NewUserService(userRepository, passwordGenerator)
-	authService := app.NewAuthService(userService, conf)
-	registerController := handlers.NewRegisterHandler(userService, authService)
+	authService := app.NewAuthService(userService, conf, newRedis)
+	registerController := handlers.NewRegisterHandler(authService)
 	oauthController := handlers.NewOauthHandler(userService, authService)
 
 	postRepository := database.NewPostRepository(sess)
@@ -47,6 +56,8 @@ func New(conf config.Configuration) Container {
 	commentRepository := database.NewCommentRepository(sess)
 	commentService := app.NewCommentService(commentRepository, userService, postService)
 	commentHandler := handlers.NewCommentHandler(commentService)
+
+	authMiddleware := middleware.NewMiddleware(authService, newRedis)
 
 	return Container{
 		Services: Services{
@@ -60,6 +71,9 @@ func New(conf config.Configuration) Container {
 			postHandler,
 			registerController,
 			oauthController,
+		},
+		Middleware: Middleware{
+			authMiddleware,
 		},
 	}
 }
@@ -76,4 +90,11 @@ func getDbSess(conf config.Configuration) db.Session {
 		log.Fatalf("Unable to create new DB session: %q\n", err)
 	}
 	return sess
+}
+
+func getRedis(conf config.Configuration) *redis.Client {
+	addr := fmt.Sprintf("%s:%s", conf.RedisHost, conf.RedisPort)
+	return redis.NewClient(&redis.Options{
+		Addr: addr,
+	})
 }
