@@ -11,7 +11,7 @@ import (
 	"trainee/internal/app/mocks"
 	"trainee/internal/domain"
 	"trainee/internal/infra/http/handlers"
-	"trainee/internal/infra/http/handlers/test_case"
+	test_case "trainee/internal/infra/http/handlers/test_case"
 	"trainee/internal/infra/http/requests"
 )
 
@@ -144,36 +144,36 @@ func TestWalkCommentSuccess(t *testing.T) {
 
 	cases := []test_case.TestCase{
 		{
-			"GetComment Success",
-			requestGetComment,
-			"",
-			handleFuncGet,
-			test_case.ExpectedResponse{StatusCode: 200, BodyPart: "{\"id\":2,\"post_id\":1,\"name\":\"Name\",\"email\":\"test@mail.com\",\"body\":\"Test body\"}\n"},
+			TestName:    "GetComment Success",
+			Request:     requestGetComment,
+			RequestBody: "",
+			HandlerFunc: handleFuncGet,
+			Expected:    test_case.ExpectedResponse{StatusCode: 200, BodyPart: "{\"id\":2,\"post_id\":1,\"name\":\"Name\",\"email\":\"test@mail.com\",\"body\":\"Test body\"}\n"},
 		},
 		{
-			"SaveComment Success",
-			requestSaveComment,
-			requestCommentMock,
-			handleFuncSave,
-			test_case.ExpectedResponse{
+			TestName:    "SaveComment Success",
+			Request:     requestSaveComment,
+			RequestBody: requestCommentMock,
+			HandlerFunc: handleFuncSave,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 201,
 				BodyPart:   "{\"id\":2,\"post_id\":1,\"name\":\"Name\",\"email\":\"test@mail.com\",\"body\":\"Test body\"}\n"},
 		},
 		{
-			"UpdateComment Success",
-			requestUpdateComment,
-			requests.CommentRequest{Body: "Update body"},
-			handleFuncUpdate,
-			test_case.ExpectedResponse{
+			TestName:    "UpdateComment Success",
+			Request:     requestUpdateComment,
+			RequestBody: requests.CommentRequest{Body: "Update body"},
+			HandlerFunc: handleFuncUpdate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 200,
 				BodyPart:   "{\"id\":2,\"post_id\":1,\"name\":\"Name\",\"email\":\"test@mail.com\",\"body\":\"Update body\"}\n"},
 		},
 		{
-			"DeleteComment Success",
-			requestDeleteComment,
-			"",
-			handleFuncDelete,
-			test_case.ExpectedResponse{
+			TestName:    "DeleteComment Success",
+			Request:     requestDeleteComment,
+			RequestBody: "",
+			HandlerFunc: handleFuncDelete,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 200,
 			},
 		},
@@ -226,78 +226,78 @@ func TestWalkCommentsDecodeValidationParsingErrors(t *testing.T) {
 
 	cases := []test_case.TestCase{
 		{
-			"UpdateComment comment data error",
-			requestUpdateComment,
-			"",
-			handleFuncUpdate,
-			test_case.ExpectedResponse{
+			TestName:    "UpdateComment comment data error",
+			Request:     requestUpdateComment,
+			RequestBody: "",
+			HandlerFunc: handleFuncUpdate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not decode comment data\"}\n"},
 		},
 		{
-			"SaveComment comment error",
-			requestSaveComment,
-			"",
-			handleFuncSave,
-			test_case.ExpectedResponse{
+			TestName:    "SaveComment comment error",
+			Request:     requestSaveComment,
+			RequestBody: "",
+			HandlerFunc: handleFuncSave,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not decode comment data\"}\n"},
 		},
 		{
-			"UpdateComment validate error",
-			requestUpdateComment,
-			requests.PostRequest{
+			TestName: "UpdateComment validate error",
+			Request:  requestUpdateComment,
+			RequestBody: requests.PostRequest{
 				Title: "title",
 			},
-			handleFuncUpdate,
-			test_case.ExpectedResponse{
+			HandlerFunc: handleFuncUpdate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 422,
 				BodyPart:   "{\"code\":422,\"error\":\"Could not validate comment data\"}\n"},
 		},
 		{
-			"SaveComment validate error",
-			requestSaveComment,
-			requests.PostRequest{
+			TestName: "SaveComment validate error",
+			Request:  requestSaveComment,
+			RequestBody: requests.PostRequest{
 				Title: "title",
 			},
-			handleFuncSave,
-			test_case.ExpectedResponse{
+			HandlerFunc: handleFuncSave,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 422,
 				BodyPart:   "{\"code\":422,\"error\":\"Could not validate comment data\"}\n"},
 		},
 		{
-			"SaveComment parse path param Error",
-			requestSaveCommentError,
-			requestCommentMock,
-			handleFuncSave,
-			test_case.ExpectedResponse{
+			TestName:    "SaveComment parse path param Error",
+			Request:     requestSaveCommentError,
+			RequestBody: requestCommentMock,
+			HandlerFunc: handleFuncSave,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not parse post ID\"}\n"},
 		},
 		{
-			"GetComment parse path param Error",
-			requestGetCommentError,
-			"",
-			handleFuncGet,
-			test_case.ExpectedResponse{
+			TestName:    "GetComment parse path param Error",
+			Request:     requestGetCommentError,
+			RequestBody: "",
+			HandlerFunc: handleFuncGet,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not parse comment ID\"}\n"},
 		},
 		{
-			"UpdateComment parse path param Error",
-			requestUpdateCommentError,
-			requestPostMock,
-			handleFuncUpdate,
-			test_case.ExpectedResponse{
+			TestName:    "UpdateComment parse path param Error",
+			Request:     requestUpdateCommentError,
+			RequestBody: requestPostMock,
+			HandlerFunc: handleFuncUpdate,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 				BodyPart:   "{\"code\":400,\"error\":\"Could not parse comment ID\"}\n"},
 		},
 		{
-			"DeleteComment parse path param Error",
-			requestDeleteCommentError,
-			"",
-			handleFuncDelete,
-			test_case.ExpectedResponse{
+			TestName:    "DeleteComment parse path param Error",
+			Request:     requestDeleteCommentError,
+			RequestBody: "",
+			HandlerFunc: handleFuncDelete,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 400,
 			},
 		},
@@ -388,72 +388,72 @@ func TestWalkCommentServiceErrors(t *testing.T) {
 
 	cases := []test_case.TestCase{
 		{
-			"GetComment NoMoreRows",
-			requestGetComment,
-			"",
-			handleFuncGetNotFound,
-			test_case.ExpectedResponse{StatusCode: 404, BodyPart: "{\"code\":404,\"error\":\"Could not get comment: upper: no more rows in this result set\"}\n"},
+			TestName:    "GetComment NoMoreRows",
+			Request:     requestGetComment,
+			RequestBody: "",
+			HandlerFunc: handleFuncGetNotFound,
+			Expected:    test_case.ExpectedResponse{StatusCode: 404, BodyPart: "{\"code\":404,\"error\":\"Could not get comment: upper: no more rows in this result set\"}\n"},
 		},
 		{
-			"UpdateComment NoMoreRows",
-			requestUpdateComment,
-			requestCommentMock,
-			handleFuncUpdateNotFound,
-			test_case.ExpectedResponse{
+			TestName:    "UpdateComment NoMoreRows",
+			Request:     requestUpdateComment,
+			RequestBody: requestCommentMock,
+			HandlerFunc: handleFuncUpdateNotFound,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 404,
 				BodyPart:   "{\"code\":404,\"error\":\"Could not update comment: upper: no more rows in this result set\"}\n"},
 		},
 		{
-			"DeleteComment NoMoreRows",
-			requestDeleteComment,
-			"",
-			handleFuncDeleteNotFound,
-			test_case.ExpectedResponse{
+			TestName:    "DeleteComment NoMoreRows",
+			Request:     requestDeleteComment,
+			RequestBody: "",
+			HandlerFunc: handleFuncDeleteNotFound,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 404,
 			},
 		},
 		{
-			"UpdateComment NoMoreRows",
-			requestSaveComment,
-			requestCommentMock,
-			handleFuncSaveNotFound,
-			test_case.ExpectedResponse{
+			TestName:    "UpdateComment NoMoreRows",
+			Request:     requestSaveComment,
+			RequestBody: requestCommentMock,
+			HandlerFunc: handleFuncSaveNotFound,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 404,
 				BodyPart:   "{\"code\":404,\"error\":\"Could not save new comment: upper: no more rows in this result set\"}\n"},
 		},
 		{
-			"GetComment InternalServerError",
-			requestGetComment,
-			"",
-			handleFuncGetInternalServerError,
-			test_case.ExpectedResponse{
+			TestName:    "GetComment InternalServerError",
+			Request:     requestGetComment,
+			RequestBody: "",
+			HandlerFunc: handleFuncGetInternalServerError,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 				BodyPart:   "{\"code\":500,\"error\":\"Could not get comment: upper: collection does not exist\"}\n"},
 		},
 		{
-			"UpdateComment InternalServerError",
-			requestUpdateComment,
-			requestCommentMock,
-			handleFuncUpdateInternalServerError,
-			test_case.ExpectedResponse{
+			TestName:    "UpdateComment InternalServerError",
+			Request:     requestUpdateComment,
+			RequestBody: requestCommentMock,
+			HandlerFunc: handleFuncUpdateInternalServerError,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 				BodyPart:   "{\"code\":500,\"error\":\"Could not update comment: upper: collection does not exist\"}\n"},
 		},
 		{
-			"DeleteComment InternalServerError",
-			requestDeleteComment,
-			"",
-			handleFuncDeleteInternalServerError,
-			test_case.ExpectedResponse{
+			TestName:    "DeleteComment InternalServerError",
+			Request:     requestDeleteComment,
+			RequestBody: "",
+			HandlerFunc: handleFuncDeleteInternalServerError,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 			},
 		},
 		{
-			"SaveComment InternalServerError",
-			requestSaveComment,
-			requestCommentMock,
-			handleFuncSaveInternalServerError,
-			test_case.ExpectedResponse{
+			TestName:    "SaveComment InternalServerError",
+			Request:     requestSaveComment,
+			RequestBody: requestCommentMock,
+			HandlerFunc: handleFuncSaveInternalServerError,
+			Expected: test_case.ExpectedResponse{
 				StatusCode: 500,
 				BodyPart:   "{\"code\":500,\"error\":\"Could not save new comment: upper: collection does not exist\"}\n"},
 		},
