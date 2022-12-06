@@ -2,6 +2,7 @@
 It's an API on Echo framework.
 My aim is to work with this framework and personal development.
 There is a useful set of tools, which are described below.
+(I know that I can't store environment variables in the public domain, I need to put them in github secrets, but otherwise you won't be able to fully test my application)
 
 ## Inside:
 
