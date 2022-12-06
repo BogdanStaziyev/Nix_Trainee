@@ -51,11 +51,12 @@ func New(conf config.Configuration) Container {
 
 	postRepository := database.NewPostRepository(sess)
 	postService := app.NewPostService(postRepository)
-	postHandler := handlers.NewPostHandler(postService)
 
 	commentRepository := database.NewCommentRepository(sess)
 	commentService := app.NewCommentService(commentRepository, userService, postService)
 	commentHandler := handlers.NewCommentHandler(commentService)
+
+	postHandler := handlers.NewPostHandler(postService, commentService)
 
 	authMiddleware := middleware.NewMiddleware(authService, newRedis)
 

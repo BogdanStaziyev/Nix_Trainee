@@ -8,6 +8,12 @@ services:
       - DB_USER=admin
       - DB_PASSWORD=password
       - REDIS_URL=nix_redis
+      - REDIS_PORT=6379
+      - ACCESS_SECRET=access
+      - REFRESH_SECRET=refresh
+      - CLIENT_ID=173209494211-beirqlnkqlp9ck77r2ptqp7aino9anpo.apps.googleusercontent.com
+      - CLIENT_SECRET=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
+      - REDIRECT_URL=http://localhost:8080/auth/google/callback
     build:
       context: ../
       dockerfile: .docker/dockerfile

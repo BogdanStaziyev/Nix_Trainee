@@ -15,12 +15,14 @@ import (
 )
 
 type PostHandler struct {
-	service app.PostService
+	service        app.PostService
+	commentService app.CommentService
 }
 
-func NewPostHandler(s app.PostService) PostHandler {
+func NewPostHandler(s app.PostService, c app.CommentService) PostHandler {
 	return PostHandler{
-		service: s,
+		service:        s,
+		commentService: c,
 	}
 }
 
@@ -63,6 +65,7 @@ func (p PostHandler) SavePost(ctx echo.Context) error {
 // @Tags			Posts Actions
 // @Produce 		json
 // @Param			id path int true "ID"
+// @Param			offset path int true "Offset"
 // @Success 		200 {object} response.PostResponse
 // @Failure 		400 {object} response.Error
 // @Failure 		404 {object} response.Error
@@ -74,6 +77,10 @@ func (p PostHandler) GetPost(ctx echo.Context) error {
 	if err != nil {
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "Could not parse post ID")
 	}
+	offset, err := strconv.ParseInt(ctx.QueryParam("offset"), 10, 0)
+	if err != nil {
+		offset = 0
+	}
 	post, err := p.service.GetPost(id)
 	if err != nil {
 		log.Print(err)
@@ -82,6 +89,13 @@ func (p PostHandler) GetPost(ctx echo.Context) error {
 		} else {
 			return response.ErrorResponse(ctx, http.StatusInternalServerError, fmt.Sprintf("Could not get post: %s", err))
 		}
+	}
+	postComments, err := p.commentService.GetCommentsByPostID(id, int(offset))
+	if err != nil {
+		log.Print("There are no comments for this post")
+	} else {
+		dom := domain.Comment{}
+		post.Comments = dom.AllCommentsDomainToResponse(postComments)
 	}
 	postResponse := domain.Post.DomainToResponse(post)
 	return response.Response(ctx, http.StatusOK, postResponse)

@@ -319,6 +319,13 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -708,6 +715,12 @@ const docTemplate = `{
                 "body": {
                     "type": "string",
                     "example": "Lorem ipsum"
+                },
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.CommentResponse"
+                    }
                 },
                 "id": {
                     "type": "integer",

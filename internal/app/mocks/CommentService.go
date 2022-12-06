@@ -52,13 +52,13 @@ func (_m *CommentService) GetComment(id int64) (domain.Comment, error) {
 	return r0, r1
 }
 
-// GetCommentsByPostID provides a mock function with given fields: postID
-func (_m *CommentService) GetCommentsByPostID(postID int64) ([]domain.Comment, error) {
-	ret := _m.Called(postID)
+// GetCommentsByPostID provides a mock function with given fields: postID, offset
+func (_m *CommentService) GetCommentsByPostID(postID int64, offset int) ([]domain.Comment, error) {
+	ret := _m.Called(postID, offset)
 
 	var r0 []domain.Comment
-	if rf, ok := ret.Get(0).(func(int64) []domain.Comment); ok {
-		r0 = rf(postID)
+	if rf, ok := ret.Get(0).(func(int64, int) []domain.Comment); ok {
+		r0 = rf(postID, offset)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]domain.Comment)
@@ -66,8 +66,8 @@ func (_m *CommentService) GetCommentsByPostID(postID int64) ([]domain.Comment, e
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(postID)
+	if rf, ok := ret.Get(1).(func(int64, int) error); ok {
+		r1 = rf(postID, offset)
 	} else {
 		r1 = ret.Error(1)
 	}
