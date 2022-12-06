@@ -97,7 +97,12 @@ func TestWalkPostSuccess(t *testing.T) {
 			mock.On("GetPost", id).Return(returnDomainPostMock, nil).Times(1)
 			return mock
 		}(1)
-		return handlers.NewPostHandler(mock).GetPost(c)
+		mockComment := func(id int64, offset int) app.CommentService {
+			mockComment := mocks.NewCommentService(t)
+			mockComment.On("GetCommentsByPostID", id, offset).Return([]domain.Comment{}, nil).Times(1)
+			return mockComment
+		}(1, 0)
+		return handlers.NewPostHandler(mock, mockComment).GetPost(c)
 	}
 
 	handleFuncSave := func(c echo.Context) error {
@@ -106,7 +111,8 @@ func TestWalkPostSuccess(t *testing.T) {
 			mock.On("SavePost", requestPostMock, token).Return(returnDomainPostMock, nil).Times(1)
 			return mock
 		}(requestPostMock, test_case.Token())
-		return handlers.NewPostHandler(mock).SavePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).SavePost(c)
 	}
 
 	handleFuncUpdate := func(c echo.Context) error {
@@ -115,7 +121,8 @@ func TestWalkPostSuccess(t *testing.T) {
 			mock.On("UpdatePost", requestPostMock, id).Return(returnDomainPostMock, nil).Times(1)
 			return mock
 		}(requestPostMock, 1)
-		return handlers.NewPostHandler(mock).UpdatePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).UpdatePost(c)
 	}
 
 	handleFuncDelete := func(c echo.Context) error {
@@ -124,7 +131,8 @@ func TestWalkPostSuccess(t *testing.T) {
 			mock.On("DeletePost", id).Return(nil).Times(1)
 			return mock
 		}(1)
-		return handlers.NewPostHandler(mock).DeletePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).DeletePost(c)
 	}
 
 	cases := []test_case.TestCase{
@@ -135,7 +143,7 @@ func TestWalkPostSuccess(t *testing.T) {
 			HandlerFunc: handleFuncGet,
 			Expected: test_case.ExpectedResponse{
 				StatusCode: 200,
-				BodyPart:   "{\"id\":1,\"user_id\":1,\"title\":\"title\",\"body\":\"body\"}\n"},
+				BodyPart:   "{\"id\":1,\"user_id\":1,\"title\":\"title\",\"body\":\"body\",\"comments\":null}\n"},
 		},
 		{
 			TestName:    "SavePost Success",
@@ -144,7 +152,7 @@ func TestWalkPostSuccess(t *testing.T) {
 			HandlerFunc: handleFuncSave,
 			Expected: test_case.ExpectedResponse{
 				StatusCode: 201,
-				BodyPart:   "{\"id\":1,\"user_id\":1,\"title\":\"title\",\"body\":\"body\"}\n"},
+				BodyPart:   "{\"id\":1,\"user_id\":1,\"title\":\"title\",\"body\":\"body\",\"comments\":null}\n"},
 		},
 		{
 			TestName:    "UpdatePost Success",
@@ -153,7 +161,7 @@ func TestWalkPostSuccess(t *testing.T) {
 			HandlerFunc: handleFuncUpdate,
 			Expected: test_case.ExpectedResponse{
 				StatusCode: 200,
-				BodyPart:   "{\"id\":1,\"user_id\":1,\"title\":\"title\",\"body\":\"body\"}\n"},
+				BodyPart:   "{\"id\":1,\"user_id\":1,\"title\":\"title\",\"body\":\"body\",\"comments\":null}\n"},
 		},
 		{
 			TestName:    "DeletePost Success",
@@ -184,7 +192,8 @@ func TestWalkPostsDecodeValidationParsingErrors(t *testing.T) {
 			mock := mocks.NewPostService(t)
 			return mock
 		}()
-		return handlers.NewPostHandler(mock).GetPost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).GetPost(c)
 	}
 
 	handleFuncUpdate := func(c echo.Context) error {
@@ -192,7 +201,8 @@ func TestWalkPostsDecodeValidationParsingErrors(t *testing.T) {
 			mock := mocks.NewPostService(t)
 			return mock
 		}()
-		return handlers.NewPostHandler(mock).UpdatePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).UpdatePost(c)
 	}
 
 	handleFuncDelete := func(c echo.Context) error {
@@ -200,7 +210,8 @@ func TestWalkPostsDecodeValidationParsingErrors(t *testing.T) {
 			mock := mocks.NewPostService(t)
 			return mock
 		}()
-		return handlers.NewPostHandler(mock).DeletePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).DeletePost(c)
 	}
 
 	handleFuncSave := func(c echo.Context) error {
@@ -208,7 +219,8 @@ func TestWalkPostsDecodeValidationParsingErrors(t *testing.T) {
 			mock := mocks.NewPostService(t)
 			return mock
 		}()
-		return handlers.NewPostHandler(mock).SavePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).SavePost(c)
 	}
 
 	cases := []test_case.TestCase{
@@ -300,7 +312,8 @@ func TestWalkPostServiceErrors(t *testing.T) {
 			mock.On("GetPost", id).Return(domain.Post{}, db.ErrNoMoreRows).Times(1)
 			return mock
 		}(1)
-		return handlers.NewPostHandler(mock).GetPost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).GetPost(c)
 	}
 
 	handleFuncUpdateNotFound := func(c echo.Context) error {
@@ -309,7 +322,8 @@ func TestWalkPostServiceErrors(t *testing.T) {
 			mock.On("UpdatePost", requestPostMock, id).Return(domain.Post{}, db.ErrNoMoreRows).Times(1)
 			return mock
 		}(requestPostMock, 1)
-		return handlers.NewPostHandler(mock).UpdatePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).UpdatePost(c)
 	}
 
 	handleFuncDeleteNotFound := func(c echo.Context) error {
@@ -318,7 +332,8 @@ func TestWalkPostServiceErrors(t *testing.T) {
 			mock.On("DeletePost", id).Return(db.ErrNoMoreRows).Times(1)
 			return mock
 		}(1)
-		return handlers.NewPostHandler(mock).DeletePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).DeletePost(c)
 	}
 	handleFuncGetInternalServerError := func(c echo.Context) error {
 		mock := func(id int64) app.PostService {
@@ -326,7 +341,8 @@ func TestWalkPostServiceErrors(t *testing.T) {
 			mock.On("GetPost", id).Return(domain.Post{}, db.ErrCollectionDoesNotExist).Times(1)
 			return mock
 		}(1)
-		return handlers.NewPostHandler(mock).GetPost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).GetPost(c)
 	}
 
 	handleFuncUpdateInternalServerError := func(c echo.Context) error {
@@ -335,7 +351,8 @@ func TestWalkPostServiceErrors(t *testing.T) {
 			mock.On("UpdatePost", requestPostMock, id).Return(domain.Post{}, db.ErrCollectionDoesNotExist).Times(1)
 			return mock
 		}(requestPostMock, 1)
-		return handlers.NewPostHandler(mock).UpdatePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).UpdatePost(c)
 	}
 
 	handleFuncDeleteInternalServerError := func(c echo.Context) error {
@@ -344,7 +361,8 @@ func TestWalkPostServiceErrors(t *testing.T) {
 			mock.On("DeletePost", id).Return(db.ErrCollectionDoesNotExist).Times(1)
 			return mock
 		}(1)
-		return handlers.NewPostHandler(mock).DeletePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).DeletePost(c)
 	}
 
 	handleFuncSaveInternalServerError := func(c echo.Context) error {
@@ -353,7 +371,8 @@ func TestWalkPostServiceErrors(t *testing.T) {
 			mock.On("SavePost", requestPostMock, token).Return(domain.Post{}, db.ErrCollectionDoesNotExist).Times(1)
 			return mock
 		}(requestPostMock, test_case.Token())
-		return handlers.NewPostHandler(mock).SavePost(c)
+		mockComment := mocks.NewCommentService(t)
+		return handlers.NewPostHandler(mock, mockComment).SavePost(c)
 	}
 
 	cases := []test_case.TestCase{

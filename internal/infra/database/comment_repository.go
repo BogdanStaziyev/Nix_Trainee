@@ -26,7 +26,7 @@ type CommentRepo interface {
 	GetComment(id int64) (domain.Comment, error)
 	UpdateComment(comment domain.Comment) (domain.Comment, error)
 	DeleteComment(id int64) error
-	GetCommentsByPostID(postID int64) ([]domain.Comment, error)
+	GetCommentsByPostID(postID int64, offset int) ([]domain.Comment, error)
 }
 
 type commentsRepository struct {
@@ -86,10 +86,10 @@ func (r commentsRepository) DeleteComment(id int64) error {
 	return nil
 }
 
-func (r commentsRepository) GetCommentsByPostID(postID int64) ([]domain.Comment, error) {
+func (r commentsRepository) GetCommentsByPostID(postID int64, offset int) ([]domain.Comment, error) {
 	var comment []comments
 
-	err := r.coll.Find(db.Cond{"post_id": postID}).All(&comment)
+	err := r.coll.Find(db.Cond{"post_id": postID}).Offset(offset).Limit(10).All(&comment)
 	if err != nil {
 		return []domain.Comment{}, fmt.Errorf("comment repository GetCommentsByPostID: %w", err)
 	}

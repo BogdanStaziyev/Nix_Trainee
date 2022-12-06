@@ -39,16 +39,16 @@ func GetConfiguration() Configuration {
 	}
 
 	return Configuration{
-		DatabaseName:      os.Getenv("NAME_DB"),
-		DatabaseHost:      os.Getenv("HOST_DB"),
-		DatabaseUser:      os.Getenv("USER_DB"),
-		DatabasePassword:  os.Getenv("PASSWORD_DB"),
+		DatabaseName:      os.Getenv("DB_NAME"),
+		DatabaseHost:      os.Getenv("DB_HOST"),
+		DatabaseUser:      os.Getenv("DB_USER"),
+		DatabasePassword:  os.Getenv("DB_PASSWORD"),
 		MigrateToVersion:  migrateToVersion,
 		MigrationLocation: migrationLocation,
-		AccessSecret:      os.Getenv("ACCESS_SECRET_"),
-		RefreshSecret:     os.Getenv("REFRESH_SECRET_"),
+		AccessSecret:      os.Getenv("ACCESS_SECRET"),
+		RefreshSecret:     os.Getenv("REFRESH_SECRET"),
 		OAUTH:             LoadOAUTHConfiguration(),
-		RedisPort:         "6379",
-		RedisHost:         "127.0.0.1",
+		RedisPort:         os.Getenv("REDIS_PORT"),
+		RedisHost:         os.Getenv("REDIS_URL"),
 	}
 }

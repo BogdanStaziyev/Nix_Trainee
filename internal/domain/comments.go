@@ -25,3 +25,11 @@ func (c Comment) DomainToResponse() response.CommentResponse {
 		Body:   c.Body,
 	}
 }
+
+func (c Comment) AllCommentsDomainToResponse(comments []Comment) []response.CommentResponse {
+	var convertDomainCommentsToResponse []response.CommentResponse
+	for _, com := range comments {
+		convertDomainCommentsToResponse = append(convertDomainCommentsToResponse, com.DomainToResponse())
+	}
+	return convertDomainCommentsToResponse
+}

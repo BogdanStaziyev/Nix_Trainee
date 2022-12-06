@@ -96,6 +96,10 @@ definitions:
       body:
         example: Lorem ipsum
         type: string
+      comments:
+        items:
+          $ref: '#/definitions/response.CommentResponse'
+        type: array
       id:
         example: 1
         type: integer
@@ -308,6 +312,11 @@ paths:
       - description: ID
         in: path
         name: id
+        required: true
+        type: integer
+      - description: Offset
+        in: path
+        name: offset
         required: true
         type: integer
       produces:
