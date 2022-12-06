@@ -92,7 +92,7 @@ func (p PostHandler) GetPost(ctx echo.Context) error {
 	}
 	postComments, err := p.commentService.GetCommentsByPostID(id, int(offset))
 	if err != nil {
-		postComments = nil
+		log.Print("There are no comments for this post")
 	} else {
 		dom := domain.Comment{}
 		post.Comments = dom.AllCommentsDomainToResponse(postComments)
