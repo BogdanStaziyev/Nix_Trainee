@@ -18,5 +18,4 @@
 go.work
 
 .idea
-.vscode
 .env
